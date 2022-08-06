@@ -1,6 +1,6 @@
-# git 代码地址
+﻿# git 代码地址
 
-[我自己关于本项目的 git 仓库地址]()
+[我自己关于本项目的 git 仓库地址](https://github.com/LLanQing/shopping)
 
 # 前端 Vue 核心
 
@@ -18,13 +18,13 @@
 
 **src 文件夹**（程序员代码文件夹）
 
-    assets： 存放公用的静态资源
+    assets： 存放公用的静态资源，webpack打包时会把静态资源当做一个模块，打包到js文件里面
     components： 非路由组件（全局组件），其他组件放在views或者pages文件夹中
     App.vue： 唯一的跟组件
     main.js： 程序入口文件，最先执行的文件
 
 **babel.config.js**: 配置文件（babel 相关）
-**package.json**: 项目的详细信息记录
+**package.json**: 项目的详细信息记录，安装的依赖包信息等
 **package-lock.json**: 缓存性文件（各种包的来源）
 
 # 2、项目配置
@@ -84,7 +84,7 @@ vue 是单页面开发，我们只需要修改 public 下的 index.html 文件
 
 `<link rel="stylesheet" href="reset.css">`
 
-# 5、pages 文件夹
+# 5、搭建路由
 
 创建 pages 文件夹，并创建路由组件
 5.1 创建 router 文件夹，并创建 index.js 进行路由配置，最终在 main.js 中引入注册
@@ -93,15 +93,49 @@ vue 是单页面开发，我们只需要修改 public 下的 index.html 文件
 路由组件和非路由组件区别：
 
 - 非路由组件放在 components 中，路由组件放在 pages 或 views 中
+
 - 非路由组件通过标签使用，路由组件通过路由使用
-- 在 main.js 注册玩路由，所有的路由和非路由组件身上都会拥有$router $route 属性
+
+- 在 main.js 注册玩路由，所有的路由和非路由组件身上都会拥有\$router、 \$route 属性
+
 - $router：一般进行编程式导航进行路由跳转
+
 - $route： 一般获取路由信息（name path params 等）
+
+- 首页路由重定向：当进入首页是，定向到 home
+
+  ```js
+  //重定向，项目启动时重定向到首页
+  {
+      path: "*",
+          redirect: "/home",
+  },
+  ```
 
   5.3 路由跳转方式
 
-- 声明式导航 router-link 标签 <router-link to=“path”>,可以把 router-link 理解为一个 a 标签，它 也可以加 class 修饰
+- 声明式导航 router-link 标签 <router-link to="path">,可以把 router-link 理解为一个 a 标签，它 也可以加 class 修饰
+
 - 编程式导航 ：声明式导航能做的编程式都能做，而且还可以处理一些业务
+
+  ```js
+  //router.push(location, onComplete?, onAbort?)
+  //该方法的参数可以是一个字符串路径，或者一个描述地址的对象。例如：
+
+  // 字符串
+  router.push("home");
+
+  // 对象
+  router.push({ path: "home" });
+
+  // 命名的路由
+  router.push({ name: "user", params: { userId: "123" } });
+
+  // 带查询参数，变成 /register?plan=private
+  router.push({ path: "register", query: { plan: "private" } });
+
+  //或者使用router.replace()方法，区别是没有浏览记录
+  ```
 
 # 6、footer 组件显示与隐藏
 
@@ -112,13 +146,13 @@ vue 是单页面开发，我们只需要修改 public 下的 index.html 文件
 
 # 7、路由传参
 
-7.1、query、params
+## 7.1、query、params
 
-- query、params 两个属性可以传递参数  
-  query 参数：不属于路径当中的一部分，类似于 get 请求，地址栏表现为 /search?k1=v1&k2=v2  
-  query 参数对应的路由信息 `path: "/search"`  
-  params 参数：属于路径当中的一部分，需要注意，在配置路由的时候，需要**占位** ,地址栏表现为 /search/v1/v2  
-  params 参数对应的路由信息要修改为`path: "/search/:keyword"` 这里的/:keyword 就是一个 params 参数的占位符
+- query、params 两个属性可以传递参数
+  - query 参数：不属于路径当中的一部分，类似于 get 请求，地址栏表现为 /search?k1=v1&k2=v2  
+    query 参数对应的路由信息 `path: "/search"`
+  - params 参数：属于路径当中的一部分，需要注意，在配置路由的时候，需要**占位** ,地址栏表现为 /search/v1/v2  
+    params 参数对应的路由信息要修改为`path: "/search/:keyword"` 这里的/:keyword 就是一个 params 参数的占位符
 - params 传参问题  
   （1）、如何指定 params 参数可传可不传
 
@@ -148,7 +182,10 @@ vue 是单页面开发，我们只需要修改 public 下的 index.html 文件
 
 （3）路由组件能不能传递 props 数据？  
 可以，但是只能传递 params 参数,具体知识为 props 属性 。
-7.2、传参方法
+
+<strong style="color:red">查一下这个错误：NavigationDuplicated: Avoided redundant navigation to current location</strong>
+
+## 7.2、传参方法
 
 - 字符串形式  
   this.$router.push("/search/"+this.params 传参+"?k="+this.query 传参)
