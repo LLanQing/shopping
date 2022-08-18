@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>测试防抖和节流函数</title>
+
+</head>
+
+<body>
+  <h2>计数器：<input type="text" value="0"></h2>
+  <button id="btn">点击数字+1</button>
+
+  <script type="module">
+    import debounce from '../tools/debounce.js'
+    import throttle from '../tools/throttle.js'
+    const input = document.getElementsByTagName('input')
+    const btn = document.getElementById('btn')
+    let count = 0;
+    btn.onclick = debounce(
+      () => {
+        console.log('回调函数执行了----');
+        count++;
+        console.log(input);
+        input.value = count;
+      },
+      1000,
+      true)
+    /* btn.onclick = throttle(
+      () => {
+        console.log('回调函数执行了----');
+        count++;
+        console.log(input);
+        input.value = count;
+      },
+      1000,
+      true) */
+
+  </script>
+</body>
+
+</html>
