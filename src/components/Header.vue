@@ -54,158 +54,144 @@
 </template>
 
 <script>
-export default {
-	name: "Header",
-	data() {
-		return {
-			keyWords: "",
-		};
-	},
-	methods: {
-		//搜索按钮的回调函数，跳转到搜索页面
-		goSearch() {
-			/* 1.使用模板字符串的形式传参,如果同时传递params、query参数，
+	export default {
+		name: 'Header',
+		data() {
+			return {
+				keyWords: '',
+			};
+		},
+		methods: {
+			//搜索按钮的回调函数，跳转到搜索页面
+			goSearch() {
+				/* 1.使用模板字符串的形式传参,如果同时传递params、query参数，
 			params的/keyWords必须写在前面，否则会被当做query参数的字符串 ，
 			当没有传递params参数是，可以在路由配置占位符时添加一个'?'，表示该参数可传可不传*/
-			// this.$router.push(
-			// 	`/search/${this.keyWords}?KW=${this.keyWords.toUpperCase()}`
-			// );
+				// this.$router.push(
+				// 	`/search/${this.keyWords}?KW=${this.keyWords.toUpperCase()}`
+				// );
 
-			// 2.使用对象形式传参
-			/* 关于使用对象形式传递参数时path配置与params参数问题:
-			使用path配置，导致params读取的是path路径上的参数，但是path没有传参数，所以传递过去params是undefined
+				// 2.使用对象形式传参
+				/* 关于使用对象形式传递参数时path配置与params参数问题:
+				(1)使用path配置，导致params读取的是path路径上的参数，但是path没有传参数，所以传递过去params是undefined
 			path: '/search',
 			如果要用path配置传递params参数，就必须像字符串写法一样传递完整的参数如下：
 			path: `/search/${this.keyWords}?KW=${this.keyWords.toUpperCase()}`, */
-			const result = this.$router.push({
-				name: "search", //对象写法，传递params参数时则不能使用 path 配置项，必须使用 name 配置
-				params: { keyWords: this.keyWords },
-				query: { KW: this.keyWords.toUpperCase() },
-			});
-			console.log(result);
+				/* const result = this.$router.push({
+					name: 'search', //对象写法，传递params参数时则不能使用 path 配置项，必须使用 name 配置
+					params: { keyWords: this.keyWords },
+					query: { KW: this.keyWords.toUpperCase() },
+				});
+				console.log(result); */
 
-			/* //指定 params 参数可传可不传,在路由配置里面path配置的params占位符后面加上一个?
+				/* //(2)指定 params 参数可传可不传,在路由配置里面path配置的params占位符后面加上一个?
 			this.$router.push({name:"Search",query:{keyword:this.keyword}}) */
 
-			/* //当传入params传入的参数为空字符串时，路由跳转地址不正确的解决办法
-			this.$router.push({
-				name: "search", //对象写法，则不能使用 path 配置项，必须使用 name 配置
-				params: { keyWords: "" || undefined }, //加入||undefined，当我们传递的参数为空串时地址栏url也可以保持正常
-				query: { KW: this.keyWords.toUpperCase() },
-			}); */
-
-			/* // 解决避免对当前位置的冗余导航问题:NavigationDuplicated: Avoided redundant navigation to current location
-			//三种方式
-			//第一种，捕获到错误但是不处理（或者做刷新页面的处理）
-			this.$router.push({
-				//对象写法，传递params参数时则不能使用 path 配置项，必须使用 name 配置，否则params传递过去的是undefined
-					name: "search", 
-				params: { keyWords: this.keyWords },
-				query: { KW: this.keyWords.toUpperCase() },
-			}).catch(() => {});	//添加catch()捕获错误但是不做操作，这样就不会刷新页面
-			//第二种，在传参的时候加上时间戳
-			this.$router.push({
-				name: "search", //对象写法，则不能使用 path 配置项，必须使用 name 配置
-				params: { keyWords: this.keyWords },
-				query: { KW: this.keyWords.toUpperCase(), timestamp:Date.now() },	//或者在传参的时候加上时间戳
-			}); */
+				//(3)当传入params传入的参数为空字符串时，路由跳转地址不正确的解决办法
+				//整合params参数，判断路由中如果有params参数，就需要在传递的时候带上
+				const location = {
+					name: 'search', //对象写法，则不能使用 path 配置项，必须使用 name 配置
+					params: { keyWords: this.keyWords || undefined }, //加入||undefined，当我们传递的参数为空串时地址栏url也可以保持正常
+				};
+				if (this.$route.query) location.query = this.$route.query;
+				this.$router.push(location);
+			},
 		},
-	},
-};
+	};
 </script>
 
 <style lang="less" scoped>
-.header {
-	& > .top {
-		background-color: #eaeaea;
-		height: 30px;
-		line-height: 30px;
+	.header {
+		& > .top {
+			background-color: #eaeaea;
+			height: 30px;
+			line-height: 30px;
 
-		.container {
+			.container {
+				width: 1200px;
+				margin: 0 auto;
+				overflow: hidden;
+
+				.loginList {
+					float: left;
+
+					p {
+						float: left;
+						margin-right: 10px;
+
+						.register {
+							border-left: 1px solid #b3aeae;
+							padding: 0 5px;
+							margin-left: 5px;
+						}
+					}
+				}
+
+				.typeList {
+					float: right;
+
+					a {
+						padding: 0 10px;
+
+						& + a {
+							border-left: 1px solid #b3aeae;
+						}
+					}
+				}
+			}
+		}
+
+		& > .bottom {
 			width: 1200px;
 			margin: 0 auto;
 			overflow: hidden;
 
-			.loginList {
+			.logoArea {
 				float: left;
 
-				p {
-					float: left;
-					margin-right: 10px;
-
-					.register {
-						border-left: 1px solid #b3aeae;
-						padding: 0 5px;
-						margin-left: 5px;
+				.logo {
+					img {
+						width: 175px;
+						margin: 25px 45px;
 					}
 				}
 			}
 
-			.typeList {
+			.searchArea {
 				float: right;
+				margin-top: 35px;
 
-				a {
-					padding: 0 10px;
+				.searchForm {
+					overflow: hidden;
 
-					& + a {
-						border-left: 1px solid #b3aeae;
+					input {
+						box-sizing: border-box;
+						width: 490px;
+						height: 32px;
+						padding: 0px 4px;
+						border: 2px solid #ea4a36;
+						float: left;
+
+						&:focus {
+							outline: none;
+						}
+					}
+
+					button {
+						height: 32px;
+						width: 68px;
+						background-color: #ea4a36;
+						border: none;
+						color: #fff;
+						float: left;
+						cursor: pointer;
+
+						&:focus {
+							outline: none;
+						}
 					}
 				}
 			}
 		}
 	}
-
-	& > .bottom {
-		width: 1200px;
-		margin: 0 auto;
-		overflow: hidden;
-
-		.logoArea {
-			float: left;
-
-			.logo {
-				img {
-					width: 175px;
-					margin: 25px 45px;
-				}
-			}
-		}
-
-		.searchArea {
-			float: right;
-			margin-top: 35px;
-
-			.searchForm {
-				overflow: hidden;
-
-				input {
-					box-sizing: border-box;
-					width: 490px;
-					height: 32px;
-					padding: 0px 4px;
-					border: 2px solid #ea4a36;
-					float: left;
-
-					&:focus {
-						outline: none;
-					}
-				}
-
-				button {
-					height: 32px;
-					width: 68px;
-					background-color: #ea4a36;
-					border: none;
-					color: #fff;
-					float: left;
-					cursor: pointer;
-
-					&:focus {
-						outline: none;
-					}
-				}
-			}
-		}
-	}
-}
 </style>
