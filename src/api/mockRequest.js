@@ -7,15 +7,15 @@ import nprogress from 'nprogress';
 import 'nprogress/nprogress.css';
 
 //创建一个新的axios，和原本的axios区别在于没有取消请求和批量发请求的方法, 其它所有语法都是一致的
-const request = axios.create({
+const mockRequest = axios.create({
 	//基础路径，会在requests发出的请求url地址前面加上baseURl
-	baseURL: '/api',
+	baseURL: '/mock',
 	//设置超时时间5s
 	timeout: 5000,
 });
 
 //设置请求拦截器
-request.interceptors.request.use(config => {
+mockRequest.interceptors.request.use(config => {
 	//对请求做一些特殊处理
 	//主要是对请求头Header配置比如添加token
 	// console.log('开启请求拦截器');
@@ -25,7 +25,7 @@ request.interceptors.request.use(config => {
 });
 
 //设置响应拦截器
-request.interceptors.response.use(
+mockRequest.interceptors.response.use(
 	response => {
 		//响应成功的回调函数
 		//对响应做一些处理
@@ -41,4 +41,4 @@ request.interceptors.response.use(
 );
 
 //暴露封装好的axios
-export default request;
+export default mockRequest;
