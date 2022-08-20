@@ -37,7 +37,7 @@
 						type="text"
 						id="autocomplete"
 						class="input-error input-xxlarge"
-						v-model="keyWords"
+						v-model="keyword"
 					/>
 					<!-- 点击按钮，跳转到搜索页面 -->
 					<button
@@ -58,40 +58,31 @@
 		name: 'Header',
 		data() {
 			return {
-				keyWords: '',
+				keyword: '',
 			};
+		},
+		//监听路由变化，如果路由中的params参数改变，输入框的keyword也需要改变(推荐方案)
+		// watch: {
+		// 	$route(newValue) {
+		// 		this.keyword = newValue.params.keyword;
+		// 	},
+		// },
+		//通过全局事件总线通知兄弟组件Header清除关键字
+		mounted() {
+			this.$bus.$on('clear', () => {
+				this.keyword = '';
+			});
 		},
 		methods: {
 			//搜索按钮的回调函数，跳转到搜索页面
 			goSearch() {
-				/* 1.使用模板字符串的形式传参,如果同时传递params、query参数，
-			params的/keyWords必须写在前面，否则会被当做query参数的字符串 ，
-			当没有传递params参数是，可以在路由配置占位符时添加一个'?'，表示该参数可传可不传*/
-				// this.$router.push(
-				// 	`/search/${this.keyWords}?KW=${this.keyWords.toUpperCase()}`
-				// );
-
-				// 2.使用对象形式传参
-				/* 关于使用对象形式传递参数时path配置与params参数问题:
-				(1)使用path配置，导致params读取的是path路径上的参数，但是path没有传参数，所以传递过去params是undefined
-			path: '/search',
-			如果要用path配置传递params参数，就必须像字符串写法一样传递完整的参数如下：
-			path: `/search/${this.keyWords}?KW=${this.keyWords.toUpperCase()}`, */
-				/* const result = this.$router.push({
-					name: 'search', //对象写法，传递params参数时则不能使用 path 配置项，必须使用 name 配置
-					params: { keyWords: this.keyWords },
-					query: { KW: this.keyWords.toUpperCase() },
-				});
-				console.log(result); */
-
-				/* //(2)指定 params 参数可传可不传,在路由配置里面path配置的params占位符后面加上一个?
-			this.$router.push({name:"Search",query:{keyword:this.keyword}}) */
-
-				//(3)当传入params传入的参数为空字符串时，路由跳转地址不正确的解决办法
+				/* 当传入params传入的参数为空字符串时，路由跳转地址不正确的解决办法：
+				判断为空时传入undefined，当我们传递的参数为空串时地址栏url也可以保持正常，
+				原因：传参的值为undefined时，ajax会处理将这个参数去掉不传。 */
 				//整合params参数，判断路由中如果有params参数，就需要在传递的时候带上
 				const location = {
 					name: 'search', //对象写法，则不能使用 path 配置项，必须使用 name 配置
-					params: { keyWords: this.keyWords || undefined }, //加入||undefined，当我们传递的参数为空串时地址栏url也可以保持正常
+					params: { keyword: this.keyword || undefined }, //加入||undefined，当我们传递的参数为空串时地址栏url也可以保持正常
 				};
 				if (this.$route.query) location.query = this.$route.query;
 				this.$router.push(location);
