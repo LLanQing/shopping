@@ -49,7 +49,10 @@
 										>综合<span
 											v-show="isOne"
 											class="iconfont"
-											:class="{ 'icon-UP': isAsc, 'icon-DOWN': isDesc }"
+											:class="{
+												'icon-icon_up': isAsc,
+												'icon-icon_down': isDesc,
+											}"
 										></span
 									></a>
 								</li>
@@ -58,7 +61,10 @@
 										>价格<span
 											v-show="isTwo"
 											class="iconfont"
-											:class="{ 'icon-UP': isAsc, 'icon-DOWN': isDesc }"
+											:class="{
+												'icon-icon_up': isAsc,
+												'icon-icon_down': isDesc,
+											}"
 										></span
 									></a>
 								</li>
@@ -68,16 +74,12 @@
 					<!-- 销售产品列表 -->
 					<div class="goods-list">
 						<ul class="yui3-g">
-							<li
-								class="yui3-u-1-5"
-								v-for="(good, index) in goodsList"
-								:key="good.id"
-							>
+							<li class="yui3-u-1-5" v-for="good in goodsList" :key="good.id">
 								<div class="list-wrap">
 									<div class="p-img">
 										<!-- 在路由跳转的时候切记别忘记带id（params）参数 -->
 										<router-link :to="`/detail/${good.id}`">
-											<img v-lazy="good.defaultImg" />
+											<img :src="good.defaultImg" />
 										</router-link>
 									</div>
 									<div class="price">
@@ -89,7 +91,7 @@
 									<div class="attr">
 										<a
 											target="_blank"
-											href="item.html"
+											href="#"
 											title="促销信息，下单即赠送三个月CIBN视频会员卡！【小米电视新品4A 58 火爆预约中】"
 											>{{ good.title }}</a
 										>
@@ -112,8 +114,7 @@
 							</li>
 						</ul>
 					</div>
-					<!-- <Pagination  :pageNo="31"  :pageSize="3" :total="99" :continues="5" @getPageNo="getPageNo"/> -->
-					<!-- 分页器:测试分页器阶段，这里数据将来需要替换的-->
+					<!-- 分页器 -->
 					<Pagination
 						:pageNo="searchParams.pageNo"
 						:pageSize="searchParams.pageSize"
@@ -130,14 +131,22 @@
 <script>
 	import SearchSelector from './SearchSelector/SearchSelector';
 	import { mapGetters, mapState } from 'vuex';
+
 	export default {
 		name: 'Search',
+		components: {
+			SearchSelector,
+		},
+		// 准备搜索商品api所需的参数
 		data() {
 			return {
 				searchParams: {
-					//产品相应的id
+					//产品分类相应的id
+					// 一级分类
 					category1Id: '',
+					// 二级分类
 					category2Id: '',
+					// 三级分类
 					category3Id: '',
 					//产品的名字
 					categoryName: '',
@@ -156,60 +165,87 @@
 				},
 			};
 		},
-		components: {
-			SearchSelector,
+
+		computed: {
+			//mapGetters里面的写法：传递的数组，获取搜索到的商品列表goodsList
+			...mapGetters('search', ['goodsList']),
+			//判断商品排序按钮哪个需要class="active"
+			isOne() {
+				return this.searchParams.order.indexOf('1') != -1;
+			},
+			isTwo() {
+				return this.searchParams.order.indexOf('2') != -1;
+			},
+			//判断商品排序是升序还是降序
+			isAsc() {
+				return this.searchParams.order.indexOf('asc') != -1;
+			},
+			isDesc() {
+				return this.searchParams.order.indexOf('desc') != -1;
+			},
+
+			//获取search模块展示产品一共多少数据
+			...mapState('search', {
+				total: state => state.searchInfo.total,
+			}),
 		},
-		//在挂载之前调用一次|可以在发请求之前将带有参数进行修改
-		beforeMount() {
-			//在发请求之前，把接口需要传递参数，进行整理（在给服务器发请求之前，把参数整理好，服务器就会返回查询的数据）
-			Object.assign(this.searchParams, this.$route.query, this.$route.params);
+		//数据监听：监听组件实例身上的属性的属性值变化
+		// watch和computed监听的属性不用写"this."，默认就是this身上的属性
+		watch: {
+			//监听路由的信息是否发生变化，如果发生变化，再次发起请求
+			$route() {
+				this.getData();
+			},
 		},
+
 		mounted() {
 			//在发请求之前咱们需要将searchParams里面参数进行修改带给服务器
 			this.getData();
+			/* 请求在挂载的时候执行一次，需要每次搜索的时候，带着参数再次发送请求，
+					所以不能放在mounted里面，将其封装成一个回调函数，每次点击搜索按钮或者商品分类菜单就请求一次 */
+			// this.$store.dispatch('getSearchInfo');
 		},
+
 		methods: {
 			//把发请求的这个action封装到一个函数里面
 			//将来需要再次发请求，你只需要在调用这个函数即可
 			getData() {
-				this.$store.dispatch('getSearchList', this.searchParams);
+				//在发请求之前，把接口需要传递参数，进行整理（在给服务器发请求之前，把参数整理好，服务器就会返回查询的数据）
+				//Object.assign(target, source_1, ···) 用于将源对象的所有可枚举属性复制到目标对象中(浅拷贝)。
+				Object.assign(this.searchParams, this.$route.query, this.$route.params);
+
+				//派发actions获取搜索商品信息，需要传递参数请求体参数
+				this.$store.dispatch('search/getSearchInfo', this.searchParams);
+
+				// 由于query参数里面的分类id不是每次都有，没有覆盖掉上一次请求的分类id
+				//每一次请求完毕，应该把相应的1、2、3级分类的id置空的，让他接受下一次的相应1、2、3
+				//分类名字与关键字不用清理：因为每一次路由发生变化的时候，都会给他赋予新的数据
+				this.searchParams.category1Id = undefined;
+				this.searchParams.category2Id = undefined;
+				this.searchParams.category3Id = undefined;
 			},
+
 			//删除分类的名字
 			removeCategoryName() {
 				//把带给服务器的参数置空了，还需要向服务器发请求
 				//带给服务器参数说明可有可无的：如果属性值为空的字符串还是会把相应的字段带给服务器
 				//但是你把相应的字段变为undefined，当前这个字段不会带给服务器
 				this.searchParams.categoryName = undefined;
-				this.searchParams.category1Id = undefined;
-				this.searchParams.category2Id = undefined;
-				this.searchParams.category3Id = undefined;
-				this.getData();
 				//地址栏也需要需改：进行路由跳转(现在的路由跳转只是跳转到自己这里)
 				//严谨：本意是删除query，如果路径当中出现params不应该删除，路由跳转的时候应该带着
-				if (this.$route.params) {
-					this.$router.push({ name: 'search', params: this.$route.params });
-				}
+				this.$router.push({ name: 'search', params: this.$route.params });
 			},
+
 			//删除关键字
 			removeKeyword() {
 				//给服务器带的参数searchParams的keyword置空
 				this.searchParams.keyword = undefined;
-				//再次发请求
-				this.getData();
-				//通知兄弟组件Header清除关键字
+				//通过全局事件总线通知兄弟组件Header清除关键字(不推荐该方案，有点小题大做，推荐使用监听路由)
 				this.$bus.$emit('clear');
-				//进行路由的跳转
-				if (this.$route.query) {
-					this.$router.push({ name: 'search', query: this.$route.query });
-				}
+				//进行路由的跳转，需要带上query参数
+				this.$router.push({ name: 'search', query: this.$route.query });
 			},
-			//自定义事件回调
-			trademarkInfo(trademark) {
-				//1:整理品牌字段的参数  "ID:品牌名称"
-				this.searchParams.trademark = `${trademark.tmId}:${trademark.tmName}`;
-				//再次发请求获取search模块列表数据进行展示
-				this.getData();
-			},
+
 			//删除品牌的信息
 			removeTradeMark() {
 				//将品牌信息置空
@@ -217,26 +253,37 @@
 				//再次发请求
 				this.getData();
 			},
-			//收集平台属性地方回调函数（自定义事件）
-			attrInfo(attr, attrValue) {
-				//["属性ID:属性值:属性名"]
-				console.log(attr, attrValue);
-				//参数格式整理好
-				let props = `${attr.attrId}:${attrValue}:${attr.attrName}`;
-				//数组去重
-				//if语句里面只有一行代码：可以省略大花括号
-				if (this.searchParams.props.indexOf(props) == -1)
-					this.searchParams.props.push(props);
-				//再次发请求
-				this.getData();
-			},
-			//removeAttr删除售卖的属性
+
+			//删除商品的属性，因为属性有很多，所以要传入属性的索引值确定要删除的属性
 			removeAttr(index) {
 				//再次整理参数
 				this.searchParams.props.splice(index, 1);
 				//再次发请求
 				this.getData();
 			},
+
+			//自定义事件回调
+			trademarkInfo(trademark) {
+				//1:整理品牌字段的参数  "ID:品牌名称"
+				this.searchParams.trademark = `${trademark.tmId}:${trademark.tmName}`;
+				//再次发请求获取search模块列表数据进行展示
+				this.getData();
+			},
+			//收集平台属性地方回调函数（自定义事件）
+			attrInfo(attr, attrValue) {
+				//["属性ID:属性值:属性名"]
+				// console.log(attr, attrValue);
+				//参数格式整理好
+				let props = `${attr.attrId}:${attrValue}:${attr.attrName}`;
+				//数组去重，点击重复的属性不会发送请求
+				// **indexOf()**方法返回在数组中可以找到一个给定元素的第一个索引，如果不存在，则返回-1。
+				if (this.searchParams.props.indexOf(props) == -1) {
+					this.searchParams.props.push(props);
+					//再次发请求
+					this.getData();
+				}
+			},
+
 			//排序的操作
 			changeOrder(flag) {
 				//flag:用户每一次点击li标签的时候，用于区分是综合（1）还是价格（2）
@@ -264,41 +311,6 @@
 				this.searchParams.pageNo = pageNo;
 				//再次发请求
 				this.getData();
-			},
-		},
-		computed: {
-			//mapGetters里面的写法：传递的数组，因为getters计算是没有划分模块【home,search】
-			...mapGetters(['goodsList']),
-			isOne() {
-				return this.searchParams.order.indexOf('1') != -1;
-			},
-			isTwo() {
-				return this.searchParams.order.indexOf('2') != -1;
-			},
-			isAsc() {
-				return this.searchParams.order.indexOf('asc') != -1;
-			},
-			isDesc() {
-				return this.searchParams.order.indexOf('desc') != -1;
-			},
-			//获取search模块展示产品一共多少数据
-			...mapState({
-				total: state => state.search.searchList.total,
-			}),
-		},
-		//数据监听：监听组件实例身上的属性的属性值变化
-		watch: {
-			//监听路由的信息是否发生变化，如果发生变化，再次发起请求
-			$route(newValue, oldValue) {
-				//每一次请求完毕，应该把相应的1、2、3级分类的id置空的，让他接受下一次的相应1、2、3
-				//再次发请求之前整理带给服务器参数
-				Object.assign(this.searchParams, this.$route.query, this.$route.params);
-				//再次发起ajax请求
-				this.getData();
-				//分类名字与关键字不用清理：因为每一次路由发生变化的时候，都会给他赋予新的数据
-				this.searchParams.category1Id = undefined;
-				this.searchParams.category2Id = undefined;
-				this.searchParams.category3Id = undefined;
 			},
 		},
 	};
