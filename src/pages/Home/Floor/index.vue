@@ -10,7 +10,7 @@
 					<ul class="nav-tabs clearfix">
 						<!-- 让第一个导航项添加class 'active'  -->
 						<li
-							:class="index === 0 ? 'active' : ''"
+							:class="{ active: index == 0 }"
 							v-for="(nav, index) in floor.navList"
 							:key="index"
 						>
