@@ -1,5 +1,5 @@
 // 将Home组件的状态相关的代码封装在home模块中
-//引入统一请求管理模块的三级菜单请求
+//引入统一请求管理模块的请求
 import {
 	reqGetCategoryList,
 	reqGetBannerList,
