@@ -8,7 +8,8 @@
 function debounce(callback, wait, immediate) {
 	// console.log('debounce---', this); //undefined
 	let timeout;
-	return function () {
+	// 返回一个函数，形成闭包，闭包里面保存了timeout
+	return function (...params) {
 		// console.log('return function---', this); //触发事件的dom元素
 		if (timeout) {
 			console.log('清除超时器');
@@ -16,7 +17,8 @@ function debounce(callback, wait, immediate) {
 		}
 		if (immediate) {
 			//立即执行
-			if (!timeout) callback.call(this); //将触发事件的对象传递给回调函数
+			//修改callback的this让其指向throttle方法的调用者，并传入参数
+			if (!timeout) callback.call(this, ...params); //将触发事件的对象传递给回调函数
 			console.log('开启超时任务');
 			timeout = setTimeout(() => {
 				timeout = null;
@@ -26,7 +28,7 @@ function debounce(callback, wait, immediate) {
 			console.log('开启超时任务');
 			timeout = setTimeout(() => {
 				// console.log('setTimeout---', this); //触发事件的dom元素
-				callback.call(this);
+				callback.call(this, ...params);
 			}, wait);
 		}
 	};

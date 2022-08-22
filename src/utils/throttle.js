@@ -7,11 +7,13 @@
  */
 function throttle(callback, wait, immediate) {
 	let timeout;
-	return function () {
+	// 返回一个函数，形成闭包，闭包里面保存了timeout
+	return function (...params) {
 		if (immediate) {
 			//立即执行
 			if (!timeout) {
-				callback.call(this);
+				//修改callback的this让其指向throttle方法的调用者，并传入参数
+				callback.call(this, ...params);
 				console.log('开启超时任务----');
 				timeout = setTimeout(() => {
 					timeout = null;
@@ -23,7 +25,8 @@ function throttle(callback, wait, immediate) {
 				console.log('开启超时任务----');
 				timeout = setTimeout(() => {
 					timeout = null;
-					callback.call(this);
+					// console.log(this);
+					callback.call(this, ...params);
 				}, wait);
 			}
 		}
