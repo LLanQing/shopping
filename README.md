@@ -1,4 +1,4 @@
-﻿# git 代码地址
+﻿git 代码地址
 
 [我自己关于本项目的 git 仓库地址](https://github.com/LLanQing/shopping)
 
@@ -94,7 +94,7 @@ module.exports = {
 		'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
 		'vue/multi-word-component-names': 'off', // 不校验组件名
 		'vue/no-multiple-template-root': 0, // 不需要使用根元素包裹template的内容
-	},
+	},	
 };
 
 ```
@@ -416,8 +416,8 @@ Vue.component(TypeNav.name, TypeNav);
 ```
 
 全局组件可以在任一页面中直接使用，不需要导入声明  
-下面全部商品分类就是三级联动组件  
-![在这里插入图片描述](https://img-blog.csdnimg.cn/08961e311d8a40f9b4f6298e0099cc19.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
+
+
 
 # 10、代码改变时实现页面自动刷新（新版本已经是自动刷新）
 
@@ -591,8 +591,7 @@ reqCateGoryList();
 # 15、nprogress 进度条插件
 
 打开一个页面时，往往会伴随一些请求，并且会在页面上方出现进度条。它的原理时，在我们发起请求的时候开启进度条，在请求成功后关闭进度条，所以只需要在 request.js 中进行配置。
-如下图所示，我们页面加载时发起了一个请求，此时页面上方出现蓝色进度条
-![在这里插入图片描述](https://img-blog.csdnimg.cn/f0df5bccfaee4274b45755b52bf40b60.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
+
 
 安装插件
 
@@ -650,7 +649,7 @@ export default request;
 ```
 
 可以通过修改 nprogress.css 文件的 background 来修改进度条颜色。
-![在这里插入图片描述](https://img-blog.csdnimg.cn/e66d5f5d851a4839810c34ad234f7c0a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_11,color_FFFFFF,t_70,g_se,x_16)
+
 
 # 16、手动引入 vuex
 
@@ -702,12 +701,9 @@ export default {
 		},
 	},
 };
-```
-
-浏览器结果
-![在这里插入图片描述](https://img-blog.csdnimg.cn/d2ba586e3edd494b9bf517cb4ee86580.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
 返回了一个 promise,证明这是一个 promise 请求，但是我们想要的是图片中的 data 数据。
 没有将函数封装前我们都会通过 then()回调函数拿到服务器返回的数据，现在我们将其封装了，依然可以使用 then 获取数据，代码如下
+```
 
 ```js
 actions:{
@@ -725,8 +721,7 @@ actions:{
     }
 ```
 
-结果
-![在这里插入图片描述](https://img-blog.csdnimg.cn/ccf35a9aa6c442c7a799e474c0293afa.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_15,color_FFFFFF,t_70,g_se,x_16)
+
 由于我们的 promis 是异步请求，我们发现请求需要花费时间，但是它是异步的，所有后面的 console.log("result")；console.log(result)会先执行，等我们的请求得到响应后，才执行 console.log("res")；console.log(res)，这也符合异步的原则，但是我们如果在请求下面啊执行的是将那个请求的结果赋值给某个变量，这样就会导致被赋值的变量先执行，并且赋值为 undefine，因为此时 promise 还没有完成。
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/afe1c716352248009e7289151e933391.png)
 所以我们引入了 async await,async 写在函数名前，await 卸载 api 函数前面。await 含义是**async 标识的函数体内的并且在 await 标识代码后面的代码**先等待 await 标识的异步请求执行完，再执行。这也使得只有 reqCateGoryList 执行完，result 得到返回值后，才会执行后面的输出操作。
@@ -789,8 +784,7 @@ import {throttle} from 'lodash'
 
 # 20、编程式导航+事件委托实现路由跳转
 
-![](https://img-blog.csdnimg.cn/5e9580e64f6f4b6c9f6f24837470d966.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
-如上图所示，三级标签列表有很多，每一个标签都是一个页面链接，我们要实现通过点击表现进行路由跳转。
+三级标签列表有很多，每一个标签都是一个页面链接，我们要实现通过点击表现进行路由跳转。
 路由跳转的两种方法：导航式路由，编程式路由。
 
 >     对于导航式路由，我们有多少个a标签就会生成多少个router-link标签，这样当我们频繁操作时会出现卡顿现象。
@@ -835,10 +829,8 @@ import {throttle} from 'lodash'
 goSearch(event){
       console.log(event.target)
     }
-```
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/4406011f40ab4b4db06e32974408ec1e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_12,color_FFFFFF,t_70,g_se,x_16)
 对应的 goSearrch 函数
+```
 
 ```js
 goSearch(event){
@@ -925,7 +917,7 @@ goSearch(event){
 我们在三级列表全局组件 TypeNav 中的 mounted 进行了请求一次商品分类列表数据。
 由于**Vue 在路由切换的时候会销毁旧路由**，当我们再次使用三级列表全局组件时还会发一次请求。
 如下图所示：当我们在包含三级列表全局组件的不同组件之间进行切换时，都会进行一次信息请求。
-![在这里插入图片描述](https://img-blog.csdnimg.cn/ea8ece30280d452b920c25ecbf1ed211.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
+
 由于信息都是一样的，出于性能的考虑我们希望该数据只请求一次，所以我们把这次请求放在 App.vue 的 mounted 中。（根组件 App.vue 的 mounted 只会执行一次）
 **注意**：虽然 main.js 也是只执行一次，但是不可以放在 main.js 中。所有的业务操作都应该放在组件中。
 
@@ -952,7 +944,7 @@ goSearch(event){
 > this.$router.push(location);
 > ```
 
-1111111-0817
+
 
 # 22、mock 插件使用
 
@@ -1408,8 +1400,7 @@ getters 是 vuex store 中的计算属性。
 Vuex 允许我们在 store 中定义“getter”（可以认为是 store 的计算属性）。就像计算属性一样，getter 的返回值会根据它的依赖被缓存起来，且只有当它的依赖值发生了改变才会被重新计算。
 **个人理解**：getters 将获取 store 中的数据封装为函数，代码维护变得更简单（和我们将请求封装为 api 一样）。而且 getter 的返回值会根据它的依赖被缓存起来，且只有当它的依赖值发生了改变才会被重新计算。
 **注意**：仓库中的 getters 是全局属性，是不分模块的。即 store 中所有模块的 getter 内的函数都可以通过`$store.getters.函数名`获取
-下图为 store 内容
-![在这里插入图片描述](https://img-blog.csdnimg.cn/7c509688db524f86a5fc919d52baec14.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
+
 我们在 Search 模块中获取商品列表数据就是通过 getters 实现，需要注意的是当网络出现故障时应该将返回值设置为空，如果不设置返回值就变成了 undefined。
 
 store 中 search 模块代码
@@ -1532,7 +1523,7 @@ console.log(JSON.stringify(obj3)); // { a: 0, b: { c: 0}}
 
 如下图所示，$route 是组件的属性，所以 watch 是可以监听的（watch 可以监听组件 data 中所有的属性）
 **注意**：组件中 data 的属性包括：自己定义的、系统自带的（如 $route）、父组件向子组件传递的等等。
-![在这里插入图片描述](https://img-blog.csdnimg.cn/4e46144dfb77491fb14e9a16e946278d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
+
 search 组件 watch 部分代码。
 
 ```js
@@ -1634,7 +1625,7 @@ mounted() {
 # 33、SearchSelector 子组件传参及面包屑操作
 
 在**31 小节**中描述了通过 query、params 参数生成面包屑，以及面包屑的删除操作对应地址栏 url 的修改。
-SearchSelector 组件有两个属性也会生成面包屑，分别为品牌名、手机属性。如下图所示![在这里插入图片描述](https://img-blog.csdnimg.cn/ff226e35cddc41948ddb1eb9d16395c5.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
+SearchSelector 组件有两个属性也会生成面包屑，分别为品牌名、手机属性。
 此处生成面包屑时会涉及到子组件向父组件传递信息操作（在 32 小节有相关知识点），之后的操作和前面 31 小姐讲的面包屑操作原理相同。唯一的区别是，这里删除面包屑时不需要修改地址栏 url，因为 url 是由路由地址确定的，并且只有 query、params 两个参数变化回影响路由地址变化。
 在具体的操作内还会涉及一些小的知识点，例如
 字符串拼接 ·${}·，使用方法如下
@@ -1759,7 +1750,7 @@ order 属性值为字符串，例如‘1：asc’、‘2：desc’。1 代表综
 我们的升降序是通过箭头图标来辨别的，如图所示：
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/c8c9d5160f5847b18e0d5e31dc52c261.png)
 图标是 iconfont 网站的图标，通过引入在线 css 的方式引入图标
-![在这里插入图片描述](https://img-blog.csdnimg.cn/bc89cd5ea2f946149876399c5ab39ac2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
+
 在 public 文件 index 引入该 css
 ` <link rel="stylesheet" href="https://at.alicdn.com/t/font_2994457_qqwrvmss9l9.css">`
 
@@ -1919,7 +1910,7 @@ html 代码
 ```
 
 下细节在于 getters 的返回值。如果 getters 按上面代码写为`return state.goodInfo.categoryView`，页面可以正常运行，但是会出现红色警告。
-![在这里插入图片描述](https://img-blog.csdnimg.cn/ce4126524cc046f69a84f85a10ebda9b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
+
 **原因**：假设我们网络故障，导致 goodInfo 的数据没有请求到，即 goodInfo 是一个空的对象，当我们去调用 getters 中的`return state.goodInfo.categoryView`时，因为 goodInfo 为空，所以也不存在 categoryView，即我们 getters 得到的 categoryView 为 undefined。所以我们在 html 使用该变量时就会出现没有该属性的报错。
 即：网络正常时不会出错，一旦无网络或者网络问题就会报错。
 **总结**：所以我们在写 getters 的时候要养成一个习惯在返回值后面加一个||条件。即当属性值 undefined 时，会返回||后面的数据，这样就不会报错。
@@ -1929,7 +1920,7 @@ html 代码
 # 39、商品详情（重点）
 
 商品详情唯一难点就是点击轮播图图片时，改变放大镜组件展示的图片。
-![在这里插入图片描述](https://img-blog.csdnimg.cn/64917660fe194ea1ac2cca35a0b332e7.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
+
 老师的方法很巧妙：在轮播图组件中设置一个 currendIndex，用来记录所点击图片的下标，并用 currendIndex 实现点击图片高亮设置。当符合图片的下标满足`currentIndex===index`时，该图片就会被标记为选中。
 
 ```js
@@ -2484,13 +2475,13 @@ mutations 存储用户信息
 
 # 47、导航守卫
 
-思路：直接看流程图
+
 为什么要判断 name？
 
 > 因为 store 中的 token 是通过 localStorage 获取的，token 有存放在本地。当页面刷新时，本地 token 不会消失，所以 store 中的 token 也不会消失。但是，store 中的其他数据（用户信息等）会清空，此时会出现用户信息不存在，但是有 token，这种情况是不可以访问其他页面的，必须先去获取用户信息。由于用户信息是一个对象，所以我们通过它的一个属性 name 判断用户信息是否存在。
 > 所以不仅要判断 token,还要判断用户信息
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/5f9936d9914c4aefaa90b20866ba0219.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
+
 
 router index.js 全局前置守卫代码
 
@@ -2548,25 +2539,6 @@ router.beforeEach(async (to, from, next) => {
 
 登录账号：13700000000/111111
 
--------------------------------------------------分割线--------------------------------------------
-
-但是，你一定希望将支付二维码换为你自己的二维码！
-如果你直接使用项目中的图片,会出现图片损坏的图标。
-解决方法：将你的二维码图片放入在博客文章中，然后就可以获取该图片的链接。
-
-```js
- data(){
-      return{
-        payInfo:{},
-        //支付二维码
-        payImg: 'https://img-blog.csdnimg.cn/6d82f91e804545cc90d9182bc57ea4ad.jpg?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_19,color_FFFFFF,t_70,g_se,x_16',
-        timer:null,//支付定时器
-        code: '',//支付状态码
-      }},
-```
-
-下面代码中涉及到计时器[setInterval()与 setTimeout()计时器](https://www.cnblogs.com/lengyuehuahun/p/5650030.html)
-
 ```js
  //点击支付按钮，弹出支付二维码
       async opens(){
@@ -2600,8 +2572,7 @@ router.beforeEach(async (to, from, next) => {
       }
 ```
 
-效果展示
-![在这里插入图片描述](https://img-blog.csdnimg.cn/f6a85b0f887d4de585c77efbbc34014a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_18,color_FFFFFF,t_70,g_se,x_16)
+
 如果 code===200 跳转，我们必须支付后台提供的二维码，才会返回 200，所以这里直接 205 就跳转了，后面的支付信息感觉没有意义了。所以，后面的支付内容就不写了。
 
 ## Vue 图片引入
@@ -2652,7 +2623,7 @@ methods:{
 </script>
 ```
 
-[图片引入参考链接](https://blog.csdn.net/ze1024/article/details/108713082)
+
 
 # 49、个人中心
 
@@ -2696,11 +2667,8 @@ routers.js
 
 ` { path: '', redirect: 'myorder' }`表示当我们访问 center 路由时，center 中的 router-view 部分默认显示 myorder 二级路由内容。
 
-我们的子路由最好放在父路由文件夹下，如下所示。
-![在这里插入图片描述](https://img-blog.csdnimg.cn/cc1f89458d094fdfa8852b930295b13c.png)
-**警告**
-![在这里插入图片描述](https://img-blog.csdnimg.cn/05eceeda80c449b3b9753c8917b6bcc4.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
-图中内容如下：
+我们的子路由最好放在父路由文件夹下。
+
 
 > Named Route 'Center' has a default child route. When navigating to this named route (:to="{name: 'Center'"), the default child route will not be rendered. Remove the name from this route and use the name of the default child route for named links instead.
 >
@@ -2889,9 +2857,8 @@ vue 使用插件的步骤
 # 54、打包项目
 
 项目到此基本就完成了，接下来就是打包上线。在项目文件夹下执行`npm run build`。会生成 dist 打包文件。
-![在这里插入图片描述](https://img-blog.csdnimg.cn/9654546cad5d44fd93a255b9a1810b22.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_19,color_FFFFFF,t_70,g_se,x_16)
 dist 就是我们打包好的项目文件
-![在这里插入图片描述](https://img-blog.csdnimg.cn/21231dcbc8034dc99a3ec0552877a93b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_17,color_FFFFFF,t_70,g_se,x_16)
+
 dist 文件下的 js 文件存放我们所有的 js 文件，并且经过了加密，并且还会生成对应的 map 文件。
 
 **map 文件作用**：因为代码是经过加密的，如果运行时报错，输出的错误信息无法准确得知时那里的代码报错。有了 map 就可以向未加密的代码一样，准确的输出是哪一行那一列有错。
@@ -2899,34 +2866,102 @@ dist 文件下的 js 文件存放我们所有的 js 文件，并且经过了加�
 当然 map 文件也可以去除（map 文件大小还是比较大的）
 在 vue.config.js 配置`productionSourceMap: false`即可。
 注意：vue.config.js 配置改变，需要重启项目
-![在这里插入图片描述](https://img-blog.csdnimg.cn/88b191bbbb12475cb56b0adf63737848.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_17,color_FFFFFF,t_70,g_se,x_16)
 
 
 
-# nginx反向代理
+# 55、部署项目
 
+## 1.购买服务器+nginx反向代理
 
+购买腾讯云或者阿里云，然后设置安全组开放端口。在云服务器安装nginx。
 
+进入到Nginx的配置文件夹中：
 
-
-
-
-# 55、Vue 新知识点（只针对个人）
-
-## 1、DOM、事件、props 个人理解
-
-在 vue 中标签可以分为两类：
-（1）原生 DOM。`<input><buttonn>`等。
-例如：
-
-```js
-<button  @click="handle" :msg="msg"></button>
+```shell
+cd /usr/local/nginx/conf/
 ```
 
-> 这里的@click 是原生 DOM 事件，也就是我们传统的点击触发事件。
-> 这里的:msg 就是绑定组件中的变量。
+编辑Nginx配置文件：
 
-（2）自定义组件。比如我们之前自定义的分页器组件例如：
+```shell
+vim nginx.conf
+```
+
+```shell
+server {                                                                     
+    listen       80;                                                         
+    listen  [::]:80;                                                         
+    server_name  frontvue-xxx.com;                 
+                                                                             
+    #access_log  /var/log/nginx/host.access.log  main;                       
+                                                                             
+    location / {                                                             
+        root   /etc/nginx/html;                                        
+        index  index.html index.htm;                                         
+    }                                                                        
+                                                                             
+    location /auth {                                                         
+        proxy_pass http://xxx.com:30000;
+    }                                                                        
+                                                                             
+    location /api-apm {                                                      
+        proxy_pass http://abcxxx.com:30000;
+    }                                                                   
+                                                                        
+    #error_page  404              /404.html;                            
+                                                                        
+    # redirect server error pages to the static page /50x.html          
+    #                                                                   
+    error_page   500 502 503 504  /50x.html;                            
+    location = /50x.html {                                              
+        root   /etc/nginx/html;                                   
+    } 
+}    
+```
+
+## 2.本地使用NodeJS+Express部署前端
+
+> 前提：下载express,connect-history-api-fallback,http-proxy-middleware
+
+将打包的dist目录放到node项目中，
+
+sever.js文件
+
+```js
+const express = require('express');
+const history = require('connect-history-api-fallback');
+const { createProxyMiddleware } = require('http-proxy-middleware');
+
+const app = express();
+//中间件
+//服务器中间件专门解决history模式(vue)出错的问题 (前端路由,后端路由混杂)
+///注意如果是hash模式就不会有这个问题
+app.use(history());
+app.use(express.static(`${__dirname}/dist`));
+// 代理前端请求地址，当请求的前缀是/api，直接转发请求到服务器http://gmall-h5-api.atguigu.cn
+app.use(
+	'/api',
+	createProxyMiddleware({
+		target: 'http://gmall-h5-api.atguigu.cn',
+		changeOrigin: true,
+	})
+);
+
+app.listen(5001, error => {
+	if (!error) console.log('服务器启动了');
+});
+
+```
+
+
+
+
+
+# 56、组件间通信方式
+
+## 1、props 
+
+自定义组件。比如我们之前自定义的分页器组件例如：
 
 ```js
 <PageNation @click="getPageNo"
@@ -2946,7 +2981,6 @@ dist 文件下的 js 文件存放我们所有的 js 文件，并且经过了加�
 > 传入一个数字 即便 `42` 是常量，我们仍然需要 `v-bind` 来告诉 Vue。这是一个 JavaScript 表达式而不是一个字符串 `<blog-post v-bind:likes="42"></blog-post>`
 
 [props 官方文档](https://cn.vuejs.org/v2/guide/components-props.html)
-**总结**：原生 DOM 标签和自定义组件标签对 v-bind 和 v-on 的使用是不同的，含义也是不同的。
 
 ## 2、ref 使用
 
@@ -3015,7 +3049,7 @@ dist 文件下的 js 文件存放我们所有的 js 文件，并且经过了加�
 
 [插槽官方链接](https://cn.vuejs.org/v2/guide/components-slots.html#%E6%8F%92%E6%A7%BD%E5%86%85%E5%AE%B9)
 
-# 56、项目亮点
+# 57、项目亮点
 
 ## 1.自己封装组件--分页器、封装防抖/节流函数
 
