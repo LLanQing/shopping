@@ -1,0 +1,1 @@
+"use strict";(self["webpackChunkshopping"]=self["webpackChunkshopping"]||[]).push([[989],{4989:function(n,u,e){e.r(u),e.d(u,{default:function(){return i}});var r=function(){var n=this,u=n._self._c;return u("div",[n._v("我的团购订单")])},s=[],t={name:"GroupOrder"},p=t,c=e(1001),f=(0,c.Z)(p,r,s,!1,null,"bfc94236",null),i=f.exports}}]);
