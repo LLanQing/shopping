@@ -19,6 +19,10 @@ request.interceptors.request.use(config => {
 	//对请求做一些特殊处理
 	//主要是对请求头Header配置比如添加token
 	// console.log('开启请求拦截器');
+	if (localStorage.getItem('TOKEN')) {
+		config.headers.token = localStorage.getItem('TOKEN');
+	}
+
 	//发出请求时开启进度条
 	nprogress.start();
 	return config; //必须返回请求，不然拦截了就发不出去了请求
@@ -31,12 +35,20 @@ request.interceptors.response.use(
 		//对响应做一些处理
 		//响应成功后关闭进度条
 		nprogress.done();
-		return response.data.data; //返回服务器响应数据
+		if (response.data.code == 200) {
+			return response.data.data; //返回服务器响应数据
+		} else {
+			console.log(
+				`请求数据失败${response.data.message}---请检查传入参数是否正确`
+			);
+			return new Promise(() => {});
+		}
 	},
 	error => {
 		//响应失败的回调函数
-		console.log('请求失败了----', error);
-		return new Promise(() => {}); //中断Promise链，便于异步任务使用await关键字
+		alert('请求失败了----', error);
+		//中断Promise链，便于异步任务使用await关键字不必使用try...catch，因为不会返回失败的Promise
+		return new Promise(() => {});
 	}
 );
 

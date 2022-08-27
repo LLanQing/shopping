@@ -8,6 +8,8 @@ import home from './home.js';
 import search from './search.js';
 import detail from './detail';
 import shopcart from './shopcart';
+import user from './user';
+import trade from './trade';
 
 // 使用vuex插件
 Vue.use(Vuex);
@@ -18,6 +20,8 @@ export default new Vuex.Store({
 		home,
 		search,
 		detail,
-		shopcart
+		shopcart,
+		user,
+		trade,
 	},
 });

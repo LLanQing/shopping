@@ -41,6 +41,56 @@ const reqDeleteCartById = skuId => request.delete(`/cart/deleteCart/${skuId}`);
 const reqUpdateCheckedById = (skuId, isChecked) =>
 	request.get(`/cart/checkCart/${skuId}/${isChecked}`);
 
+//获取验证码
+//URL:/api/user/passport/sendCode/{phone}  method:get
+const reqGetCode = phone => request.get(`/user/passport/sendCode/${phone}`);
+
+//注册
+//url:/api/user/passport/register  method:post    phone code password
+const reqUserRegister = data => request.post('/user/passport/register', data);
+
+//登录
+//URL:/api/user/passport/login  method:post phone password
+const reqUserLogin = data => request.post('/user/passport/login', data);
+
+//获取用户信息【需要带着用户的token向服务器要用户信息】
+//URL:/api/user/passport/auth/getUserInfo  method:get
+const reqUserInfo = () => request.get('/user/passport/auth/getUserInfo');
+
+//退出登录
+//URL:/api/user/passport/logout  get
+const reqLogout = () => request.get('/user/passport/logout');
+
+//获取用户地址信息
+//URL:/api/user/userAddress/auth/findUserAddressList  method:get
+const reqAddressInfo = () =>
+	request.get('/user/userAddress/auth/findUserAddressList');
+
+//获取商品清单
+//URL:/api/order/auth/trade   method:get
+const reqOrderInfo = () => request.get('/order/auth/trade');
+
+//提交订单的接口
+//URL:/api/order/auth/submitOrder?tradeNo={tradeNo}  method:post
+
+const reqSubmitOrder = (tradeNo, data) =>
+	request.post(`/order/auth/submitOrder?tradeNo=${tradeNo}`, data);
+
+//获取支付信息
+//URL:/api/payment/weixin/createNative/{orderId}  GET
+const reqPayInfo = orderId =>
+	request.get(`/payment/weixin/createNative/${orderId}`);
+
+//获取支付订单状态
+//URL:/api/payment/weixin/queryPayStatus/{orderId}  get
+const reqPayStatus = orderId =>
+	request.get(`/payment/weixin/queryPayStatus/${orderId}`);
+
+//获取个人中心的数据
+//api/order/auth/{page}/{limit}  get
+const reqMyOrderList = (page, limit) =>
+	request.get(`/order/auth/${page}/${limit}`);
+
 //将封装好的请求统一暴露出去
 export {
 	reqGetCategoryList,
@@ -52,4 +102,15 @@ export {
 	reqCartList,
 	reqDeleteCartById,
 	reqUpdateCheckedById,
+	reqGetCode,
+	reqUserRegister,
+	reqUserLogin,
+	reqUserInfo,
+	reqLogout,
+	reqAddressInfo,
+	reqOrderInfo,
+	reqSubmitOrder,
+	reqPayInfo,
+	reqPayStatus,
+	reqMyOrderList,
 };

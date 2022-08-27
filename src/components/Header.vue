@@ -6,15 +6,21 @@
 			<div class="container">
 				<div class="loginList">
 					<p>尚品汇欢迎您！</p>
-					<p>
+					<!-- 没有用户名：未登录 -->
+					<p v-if="!userName">
 						<span>请</span>
 						<router-link to="/login">登录</router-link>
 						<router-link to="/register" class="register">免费注册</router-link>
 					</p>
+					<!-- 登录了 -->
+					<p v-else>
+						<a>{{ userName }}</a>
+						<a class="register" @click="logout">退出登录</a>
+					</p>
 				</div>
 				<div class="typeList">
-					<a href="###">我的订单</a>
-					<a href="###">我的购物车</a>
+					<router-link to="/center">我的订单</router-link>
+					<router-link to="/shopcart">我的购物车</router-link>
 					<a href="###">我的尚品汇</a>
 					<a href="###">尚品汇会员</a>
 					<a href="###">企业采购</a>
@@ -27,7 +33,7 @@
 		<!--头部第二行 搜索区域-->
 		<div class="bottom">
 			<h1 class="logoArea">
-				<router-link class="logo" to="/home">
+				<router-link class="logo" to="/">
 					<img src="/images/logo.png" alt="" />
 				</router-link>
 			</h1>
@@ -54,12 +60,22 @@
 </template>
 
 <script>
+	import { mapGetters } from 'vuex';
+
 	export default {
 		name: 'Header',
 		data() {
 			return {
 				keyword: '',
 			};
+		},
+		computed: {
+			...mapGetters('user', ['userName']),
+			// userName() {
+			// 	//从仓库中获取获取用户信息(直接从localStorage里面获取的数据不是响应式的,里面的数据更新了，计算属性不会更新)
+			// 	console.log('从仓库获取用户信息');
+			// 	return this.$store.getters['user/userName'];
+			// },
 		},
 		//监听路由变化，如果路由中的params参数改变，输入框的keyword也需要改变(推荐方案)
 		// watch: {
@@ -86,6 +102,13 @@
 				};
 				if (this.$route.query) location.query = this.$route.query;
 				this.$router.push(location);
+			},
+
+			// 退出登录
+			async logout() {
+				await this.$store.dispatch('user/logout');
+				// 登出成功跳转到首页
+				this.$router.push('/');
 			},
 		},
 	};
@@ -114,6 +137,7 @@
 							border-left: 1px solid #b3aeae;
 							padding: 0 5px;
 							margin-left: 5px;
+							cursor: pointer;
 						}
 					}
 				}

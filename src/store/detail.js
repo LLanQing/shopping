@@ -2,7 +2,7 @@
 //引入统一请求管理模块的请求
 import { reqGetGoodsInfo } from '@/api';
 // 引入uuidToken生成器
-import getUuidToken from '@/utils/uuidToken';
+// import getUuidToken from '@/utils/uuidToken';
 
 export default {
 	/* 默认情况下，模块内部的 action、mutation 和 getter 是注册在全局命名空间的
@@ -15,7 +15,7 @@ export default {
 		// 商品详情数据
 		goodsInfo: {},
 		// 获取游客身份uuidToken
-		uuidToken: getUuidToken(),
+		// uuidToken: getUuidToken(),
 	},
 
 	//准备actions——用于响应组件中的动作,处理业务逻辑、ajax请求等

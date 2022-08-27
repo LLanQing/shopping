@@ -1,10 +1,7 @@
 //引入vue-router
 import VueRouter from 'vue-router';
-// 引入路由组件，路径不写全，默认读取该路径下的index文件
-import Home from '@/pages/Home';
-import Search from '@/pages/Search';
-import Login from '@/pages/Login';
-import Register from '@/pages/Register';
+// 引入路由配置模块
+import routes from './routes.js';
 
 // 第三种方式-重写vueRouter的push和replace方法
 //1、先把VueRouter原型对象的push和replace，保存一份
@@ -47,45 +44,39 @@ VueRouter.prototype.replace = function (location, resolve, reject) {
 
 // 创建路由实例
 const router = new VueRouter({
-	routes: [
-		{
-			path: '/home',
-			component: Home,
-			//meta配置中的属性提供给router使用，
-			//isFooterShow:判断页面是否需要显示Footer
-			meta: { isFooterShow: true },
-		},
-		{
-			name: 'search', // 使用name配置命名路由可以简化路由的跳转。
-			path: '/search/:keyWords?', //使用占位符声明接收params参数,?表示该参数可传可不传
-			component: Search,
-			meta: { isFooterShow: true },
-		},
-		{
-			path: '/login',
-			component: Login,
-			meta: { isFooterShow: false }, //登录和注册页面不需要显示Footer组件
-		},
-		{
-			path: '/register',
-			component: Register,
-			meta: { isFooterShow: false },
-		},
-		//重定向，项目启动时重定向到首页
-		{
-			path: '*',
-			redirect: '/home',
-		},
-	],
+	//mode配置路由工作模式，其值有两个：'hash'、'history'，默认是hash模式
+	mode: 'history',
+	//路由配置
+	routes,
+	//滚动行为
+	scrollBehavior(to, from, savedPosition) {
+		// return 期望滚动到哪个的位置
+		// 始终滚动到顶部
+		return { y: 0 };
+	},
 });
 
 //全局前置守卫
-/* router.beforeEach((to, from, next) => {
-	// isFooterShow为true时，路由才会跳转
-	if (to.meta.isFooterShow) {
+router.beforeEach((to, from, next) => {
+	// isRequiredAuth为true时，需要验证用户信息路由才会跳转
+	if (to.meta.isRequiredAuth) {
+		if (localStorage.getItem('userInfo')) {
+			// 1.如果有用户信息则跳转
+			next();
+		} else {
+			/**
+			 * 2.没有用户信息则跳转到登录页面
+			 * 	2.1并且登录完成之后会跳转到登录前想去的页面（比如想去购物车，
+			 * 		 没登录会跳转到登录页面，然后登录成功后应该跳转到购物车而不是主页）
+			 * 	2.2所以需要保存想要去的页面的路由，这里使用to.path保存在query参数里面,
+			 * 		 在登录成功后，判断query中有没有redirect，如果有就跳到redirect中
+			 */
+			next(`/login?redirect=${to.path}`);
+		}
+	} else {
 		next();
 	}
-}); */
+});
 
 // 将路由实例暴露出去
 export default router;

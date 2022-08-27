@@ -91,7 +91,7 @@
 		mounted() {
 			// console.log(this.$route);
 			//如果是Home组件，就显示TypeNav
-			if (this.$route.path === '/home') this.isShow = true;
+			if (this.$route.path === '/') this.isShow = true;
 		},
 		methods: {
 			//三级分类路由跳转到搜索页面的事件回调
@@ -133,7 +133,7 @@
 			},
 			//鼠标离开，商品分类隐藏，Home组件除外，因为它需要一直显示
 			hideSort() {
-				if (this.$route.path !== '/home') this.isShow = false;
+				if (this.$route.path !== '/') this.isShow = false;
 			},
 		},
 	};

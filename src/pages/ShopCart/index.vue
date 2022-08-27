@@ -33,7 +33,7 @@
 					</li>
 					<!-- 商品单价 -->
 					<li class="cart-list-con4">
-						<span class="price">{{ cartInfo.skuPrice.toFixed(2) }}</span>
+						<span class="price">{{ (cartInfo.skuPrice || 0).toFixed(2) }}</span>
 					</li>
 					<!-- 商品数量 -->
 					<li class="cart-list-con5">
@@ -97,7 +97,7 @@
 					<i class="summoney">{{ sumPrice }}</i>
 				</div>
 				<div class="sumbtn">
-					<a class="sum-btn" href="###" target="_blank">结算</a>
+					<router-link class="sum-btn" to="/trade">结算</router-link>
 				</div>
 			</div>
 		</div>

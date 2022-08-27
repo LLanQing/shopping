@@ -6,7 +6,7 @@
  * @param {*} immediate  true 表示回调函数立即执行，false 表非立即执行
  */
 function debounce(callback, wait, immediate) {
-	// console.log('debounce---', this); //undefined
+	// console.log('debounce---', this); //undefined，因为是严格模式，所以是undefined，非严格模式则指向window
 	let timeout;
 	// 返回一个函数，形成闭包，闭包里面保存了timeout
 	return function (...params) {

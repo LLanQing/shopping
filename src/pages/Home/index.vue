@@ -19,7 +19,7 @@
 </template>
 
 <script>
-	// 引入主页展示的路由组件
+	// 引入主页展示的静态组件
 	import ListContainer from '@/pages/Home/ListContainer';
 	import Recommend from '@/pages/Home/Recommend';
 	import Rank from '@/pages/Home/Rank';

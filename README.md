@@ -10,6 +10,8 @@
 （3）vuex（actions、mutations、state 三连操作）；
 （4）组件获取仓库数据，动态展示；
 
+[TOC]
+
 # 1、vue 文件目录分析
 
 **public 文件夹**：静态资源，webpack 进行打包的时候会原封不动打包到 dist 文件夹中。
@@ -29,7 +31,7 @@
 
 # 2、项目配置
 
-2.1 项目运行，浏览器自动打开
+## 2.1 package.json
 
 ```js
 package.json
@@ -40,7 +42,7 @@ package.json
     },
 ```
 
-2.2 关闭 eslint 校验工具（不关闭会有各种规范，不按照规范就会报错）
+## 2.2 关闭 eslint 校验工具（不关闭会有各种规范，不按照规范就会报错）
 
 - 根目录下创建 vue.config.js,进行配置
 
@@ -51,7 +53,7 @@ module.exports = {
 };
 ```
 
-2.3 src 文件夹配置别名,创建 jsconfig.json，用@/代替 src/，exclude 表示不可以使用该别名的文件
+## 2.3 src 文件夹配置别名,创建 jsconfig.json，用@/代替 src/，exclude 表示不可以使用该别名的文件
 
 ```js
  {
@@ -69,6 +71,32 @@ module.exports = {
         "dist"
     ]
  }
+```
+
+## 2.4 配置 eslint
+
+解决 Component name “xxxxx“ should always be multi-word.eslintvue 问题
+
+在根目录下找到 _.eslintrc.js_ 文件，同样如果没有则新建一个（注意文件前有个点）
+
+```json
+module.exports = {
+	root: true, // 在根目录下寻找.eslintrc.js文件，如果当前工作区打开的项目不是在根目录，则查找.eslintrc.js文件会失败，且eslint检查也不会生效
+	env: {
+		node: true,
+	},
+	extends: ['plugin:vue/essential', 'eslint:recommended'],
+	parserOptions: {
+		parser: '@babel/eslint-parser',
+	},
+	rules: {
+		'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+		'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+		'vue/multi-word-component-names': 'off', // 不校验组件名
+		'vue/no-multiple-template-root': 0, // 不需要使用根元素包裹template的内容
+	},
+};
+
 ```
 
 # 3、组件页面样式
@@ -108,7 +136,7 @@ vue 是单页面开发，我们只需要修改 public 下的 index.html 文件
   //重定向，项目启动时重定向到首页
   {
       path: "*",
-          redirect: "/home",
+          redirect: "/",
   },
   ```
 
@@ -123,16 +151,16 @@ vue 是单页面开发，我们只需要修改 public 下的 index.html 文件
   //该方法的参数可以是一个字符串路径，或者一个描述地址的对象。例如：
 
   // 字符串
-  router.push("home");
+  router.push('home');
 
   // 对象
-  router.push({ path: "home" });
+  router.push({ path: 'home' });
 
   // 命名的路由
-  router.push({ name: "user", params: { userId: "123" } });
+  router.push({ name: 'user', params: { userId: '123' } });
 
   // 带查询参数，变成 /register?plan=private
-  router.push({ path: "register", query: { plan: "private" } });
+  router.push({ path: 'register', query: { plan: 'private' } });
 
   //或者使用router.replace()方法，区别是没有浏览记录
   ```
@@ -146,66 +174,172 @@ vue 是单页面开发，我们只需要修改 public 下的 index.html 文件
 
 # 7、路由传参
 
-## 7.1、query、params
+## 7.1、传参方法
+
+- 字符串形式
+
+  ```js
+  this.$router.push("/search/"+this.params 传参+"?k="+this.query 传参)
+  ```
+
+- 模板字符串
+
+  ```js
+  /* 使用模板字符串的形式传参,如果同时传递params、query参数，
+  			params的/keyWords必须写在前面，否则会被当做query参数的字符串 ，
+  			当没有传递params参数是，可以在路由配置占位符时添加一个'?'，表示该参数可传可不传*/
+  this.$router.push(
+  	`/search/${this.keyWords}?KW=${this.keyWords.toUpperCase()}`
+  );
+  ```
+
+  **注意**： 上面字符串的传参方法可以看出 params 参数和'/'结合，query 参数和？结合  
+  `http://localhost:8080/#/search/asd?keyword=asd`  
+  上面 url 中 asd 为 params 的值，keyword=asd 为 query 传递的值。
+
+- 对象（常用）
+
+  ```js
+  // 使用对象形式传参
+  /* 关于使用对象形式传递参数时path配置与params参数问题:
+  				(1)使用path配置，导致params读取的是path路径上的参数，但是path没有传参数，所以传递过去params是undefined
+  			path: '/search',
+  			如果要用path配置传递params参数，就必须像字符串写法一样传递完整的参数如下：
+  			path: `/search/${this.keyWords}?KW=${this.keyWords.toUpperCase()}`, */
+  const result = this.$router.push({
+  	name: 'search', //对象写法，传递params参数时则不能使用 path 配置项，必须使用 name 配置
+  	params: { keyWords: this.keyWords },
+  	query: { KW: this.keyWords.toUpperCase() },
+  });
+  ```
+
+  以对象方式传参时，如果我们传参中使用了 params，只能使用 name，不能使用 path，如果只是使用 query 传参，可以使用 path
+
+## 7.2、query、params 传参
 
 - query、params 两个属性可以传递参数
   - query 参数：不属于路径当中的一部分，类似于 get 请求，地址栏表现为 /search?k1=v1&k2=v2  
     query 参数对应的路由信息 `path: "/search"`
   - params 参数：属于路径当中的一部分，需要注意，在配置路由的时候，需要**占位** ,地址栏表现为 /search/v1/v2  
     params 参数对应的路由信息要修改为`path: "/search/:keyword"` 这里的/:keyword 就是一个 params 参数的占位符
-- params 传参问题  
-  （1）、如何指定 params 参数可传可不传
+
+### 7.2.1 关于使用对象形式传递参数时 path 配置与 params 参数问题
 
 ```js
-  如果路由path要求传递params参数,但是没有传递,会发现地址栏URL有问题，详情如下：
+// 2.使用对象形式传参
+//使用path配置，导致params读取的是path路径上的参数，但是path没有传参数，所以传递过去params是undefined
+// path: '/search',
+//如果要用path配置传递params参数，就必须像字符串写法一样传递完整的参数如下：
+//path: `/search/${this.keyWords}?KW=${this.keyWords.toUpperCase()}`,
+this.$router.push({
+	//对象写法，传递params参数时则不能使用 path 配置项，必须使用 name 配置，否则params传递过去的是undefined
+	name: 'search',
+	params: { keyWords: this.keyWords },
+	query: { KW: this.keyWords.toUpperCase() },
+});
+```
+
+### 7.2.2、如何指定 params 参数可传可不传
+
+```js
+  //如果路由path要求传递params参数,但是没有传递,会发现地址栏URL有问题，详情如下：
   Search路由项的path已经指定要传一个keyword的params参数，如下所示：
   path: "/search/:keyword",
-  执行下面进行路由跳转的代码：
+  //执行下面进行路由跳转的代码：
   this.$router.push({name:"Search",query:{keyword:this.keyword}})
-  当前跳转代码没有传递params参数
-  地址栏信息：http://localhost:8080/#/?keyword=asd
-  此时的地址信息少了/search
-  正常的地址栏信息: http://localhost:8080/#/search?keyword=asd
-  解决方法：可以通过改变path来指定params参数可传可不传
+  //当前跳转代码没有传递params参数
+  //地址栏信息：http://localhost:8080/#/?keyword=asd
+  //此时的地址信息少了/search
+  //正常的地址栏信息: http://localhost:8080/#/search?keyword=asd
+  //解决方法：可以通过改变path来指定params参数可传可不传
   path: "/search/:keyword?",?表示该参数可传可不传
 ```
 
-参考连接：https://blog.csdn.net/weixin_44867717/article/details/109773945  
-（2）、由（1）可知 params 可传可不传，但是如果传递的时空串，如何解决 。
+### 7.2.3、params 如果传递的时空串，如何解决 。
 
 ```js
- this.$router.push({name:"Search",query:{keyword:this.keyword},params:{keyword:''}})
- 出现的问题和1中的问题相同,地址信息少了/search
- 解决方法： 加入||undefined，当我们传递的参数为空串时地址栏url也可以保持正常
- this.$router.push({name:"Search",query:{keyword:this.keyword},params:{keyword:''||undefined}})
+this.$router.push({
+	name: 'Search',
+	query: { keyword: this.keyword },
+	params: { keyword: '' },
+});
+//出现的问题和1中的问题相同,地址信息少了/search
+//解决方法： 加入||undefined，当我们传递的参数为空串时地址栏url也可以保持正常
+this.$router.push({
+	name: 'Search',
+	query: { keyword: this.keyword },
+	params: { keyword: '' || undefined },
+});
 ```
 
-（3）路由组件能不能传递 props 数据？  
-可以，但是只能传递 params 参数,具体知识为 props 属性 。
+## 7.3、路由的 props 配置
 
-<strong style="color:red">查一下这个错误：NavigationDuplicated: Avoided redundant navigation to current location</strong>
+```js
+{
+	name:'xiangqing',
+	path:'detail/:id',
+	component:Detail,
 
-## 7.2、传参方法
+	//第一种写法：props值为对象，该对象中所有的key-value的组合最终都会通过props传给Detail组件
+	// props:{a:900}
 
-- 字符串形式  
-  this.$router.push("/search/"+this.params 传参+"?k="+this.query 传参)
-- 模板字符串  
-  this.$router.push("/search/+${this.params 传参}?k=${this.query 传参}")  
-  **注意**： 上面字符串的传参方法可以看出 params 参数和'/'结合，query 参数和？结合  
-  `http://localhost:8080/#/search/asd?keyword=asd`  
-  上面 url 中 asd 为 params 的值，keyword=asd 为 query 传递的值。
-- 对象（常用）  
-  this.$router.push({name:"路由名字",params:{传参},query:{传参})。  
-  以对象方式传参时，如果我们传参中使用了 params，只能使用 name，不能使用 path，如果只是使用 query 传参，可以使用 path 。
+	//第二种写法：props值为布尔值，布尔值为true，则把路由收到的所有params参数通过props传给Detail组件
+	// props:true
 
-# 8、多次执行相同的 push 问题
+	//第三种写法：props值为函数，该函数返回的对象中每一组key-value都会通过props传给Detail组件
+	props(route){
+		return {
+			id:route.query.id,
+			title:route.query.title
+		}
+	}
+}
+```
 
-多次执行相同的 push 问题，控制台会出现警告  
+## 7.4 解决避免对当前位置的冗余导航问题：
+
+<strong style="color:red">NavigationDuplicated: Avoided redundant navigation to current location</strong>
+
+```js
+//三种方式
+//第一种，捕获到错误但是不处理（或者做刷新页面的处理）
+this.$router
+	.push({
+		//对象写法，传递params参数时则不能使用 path 配置项，必须使用 name 配置，否则params传递过去的是undefined
+		name: 'search',
+		params: { keyWords: this.keyWords },
+		query: { KW: this.keyWords.toUpperCase() },
+	})
+	.catch(() => {}); //添加catch()捕获错误但是不做操作，这样就不会刷新页面
+//第二种，在传参的时候加上时间戳(根治)
+this.$router.push({
+	name: 'search', //对象写法，则不能使用 path 配置项，必须使用 name 配置
+	params: { keyWords: this.keyWords },
+	query: { KW: this.keyWords.toUpperCase(), timestamp: Date.now() }, //或者在传参的时候加上时间戳
+});
+```
+
+声明式导航即使用<router-link>标签没有这个问题，因为 vue-router 底层已经处理好了
+
+## 7.5、第三种方式-重写 vueRouter 的 push 和 replace 方法
+
+多次执行相同的 push 问题，控制台会出现警告
+
+多次执行出现警告：  
+![在这里插入图片描述](https://img-blog.csdnimg.cn/308f41adccfe4268a6a2e0b4b2d2cfd0.png)
+
+原因：vue-router 底层判断相同路径时发出警告，push 返回的 是一个 promise，promise 需要传递成功回调函数和失败回调函数两个参数或者用 then()方法指定成功/失败的回调，我们的 push 中没有传递就会导致失败直接抛出。
+
+```js
+router.push(location, onComplete?, onAbort?)
+router.push(location).then(onComplete).catch(onAbort)
+```
+
 例如：使用 this.$router.push({name:'Search',params:{keyword:".."||undefined}})时，如果多次执行相同的 push，控制台会出现警告。
 
 ```js
 let result = this.$router.push({
-	name: "Search",
+	name: 'Search',
 	query: { keyword: this.keyword },
 });
 console.log(result);
@@ -213,28 +347,47 @@ console.log(result);
 
 执行一次上面代码：  
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/d7b3e04b2986474d8009fe970b7b2e63.png)
-多次执行出现警告：  
-![在这里插入图片描述](https://img-blog.csdnimg.cn/308f41adccfe4268a6a2e0b4b2d2cfd0.png)
-原因：push 是一个 promise，promise 需要传递成功和失败两个参数，我们的 push 中没有传递。  
-方法：this.$router.push({name:'Search',params:{keyword:".."||undefined}},()=>{},()=>{})后面两项分别代表执行成功和失败的回调函数。  
+**解决方法：this.$router.push({name:'Search',params:{keyword:".."||undefined}},()=>{},()=>{})后面两项分别代表执行成功和失败的回调函数。传递空的回调函数，让失败提示不显示。 **
 **这种写法治标不治本，将来在别的组件中 push|replace,编程式导航还是会有类似错误**  
 push 是 VueRouter.prototype 的一个方法，在 router 中的 index 重写该方法即可(看不懂也没关系，这是前端面试题)
 
 ```js
-//1、先把VueRouter原型对象的push，保存一份
-let originPush = VueRouter.prototype.push;
+// 第三种方式-重写vueRouter的push和replace方法
+//1、先把VueRouter原型对象的push和replace，保存一份
+const originPush = VueRouter.prototype.push;
+const originReplace = VueRouter.prototype.replace;
 //2、重写push|replace
-//第一个参数：告诉原来的push，跳转的目标位置和传递了哪些参数
+/**
+ * @description: 重写push方法，处理次发送相同参数的push和replace请求报错问题
+ * @param {*} location	目标路由和传递的参数
+ * @param {*} resolve		成功回调
+ * @param {*} reject		失败回调
+ * @return {*}
+ */
 VueRouter.prototype.push = function (location, resolve, reject) {
+	//如果有成功/失败回调就直接传递过去，没有则添加空的成功/失败回调
 	if (resolve && reject) {
-		originPush.call(this, location, resolve, reject);
+		originPush.call(this, location, resolve, reject); //将路由实例对象和其他参数传递给push方法
 	} else {
 		originPush.call(
 			this,
 			location,
 			() => {},
 			() => {}
-		);
+		); //传入空回调，不让报错显示，但是会在控制台打印undefined
+	}
+};
+VueRouter.prototype.replace = function (location, resolve, reject) {
+	//如果有成功/失败回调就直接传递过去，没有则添加空的成功/失败回调
+	if (resolve && reject) {
+		originReplace.call(this, location, resolve, reject); //将路由实例对象和其他参数传递给push方法
+	} else {
+		originReplace.call(
+			this,
+			location,
+			() => {},
+			() => {}
+		); //传入空回调，不让报错显示，但是会在控制台打印undefined
 	}
 };
 ```
@@ -245,7 +398,7 @@ VueRouter.prototype.push = function (location, resolve, reject) {
 
 ```js
 //将三级联动组件注册为全局组件
-import TypeNav from "@/pages/Home/TypeNav";
+import TypeNav from '@/pages/Home/TypeNav';
 //第一个参数：全局组件名字，第二个参数：全局组件
 Vue.component(TypeNav.name, TypeNav);
 ```
@@ -266,7 +419,7 @@ Vue.component(TypeNav.name, TypeNav);
 下面全部商品分类就是三级联动组件  
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/08961e311d8a40f9b4f6298e0099cc19.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
 
-# 10、代码改变时实现页面自动刷新
+# 10、代码改变时实现页面自动刷新（新版本已经是自动刷新）
 
 根目录下 vue.config.js 文件设置
 
@@ -335,42 +488,49 @@ export default {
 </style>
 ```
 
-# 12、封装 axios
+# 12、axios 二次封装
 
 axios 中文文档，包含详细信息。
 [https://www.kancloud.cn/yunye/axios/234845](https://www.kancloud.cn/yunye/axios/234845)
-在根目录下创建 api 文件夹，创建 request.js 文件。
+在根目录下创建 api 文件夹，一般 api 目录用来存放网络请求，创建 request.js 文件。
 内容如下，当前文件代码还比较少，后续有需求可以增添内容。
 
 ```js
-import axios from "axios";
-//1、对axios二次封装
-const requests = axios.create({
-	//基础路径，requests发出的请求在端口号后面会跟改baseURl
-	baseURL: "/api",
+//封装axios
+import axios from 'axios';
+
+//创建一个新的axios，和原本的axios区别在于没有取消请求和批量发请求的方法, 其它所有语法都是一致的
+const request = axios.create({
+	//基础路径，会在requests发出的请求url地址前面加上baseURl
+	baseURL: '/api',
+	//设置超时时间5s
 	timeout: 5000,
 });
-//2、配置请求拦截器
-requests.interceptors.request.use(config => {
-	//config内主要是对请求头Header配置
-	//比如添加token
 
-	return config;
+//设置请求拦截器
+request.interceptors.request.use(config => {
+	//对请求做一些特殊处理
+	//主要是对请求头Header配置比如添加token
+	console.log('开启请求拦截器');
+	return config; //必须返回请求，不然拦截了就发不出去了请求
 });
-//3、配置相应拦截器
-requests.interceptors.response.use(
-	res => {
-		//成功的回调函数
-		return res.data;
+
+//设置响应拦截器
+request.interceptors.response.use(
+	response => {
+		//响应成功的回调函数
+		//对响应做一些处理
+		return response.data.data; //返回服务器响应数据
 	},
 	error => {
-		//失败的回调函数
-		console.log("响应失败" + error);
-		return Promise.reject(new Error("fail"));
+		//响应失败的回调函数
+		console.log('请求失败了----', error);
+		return new Promise(() => {}); //中断Promise链，便于异步任务使用await关键字
 	}
 );
-//4、对外暴露
-export default requests;
+
+//暴露封装好的axios
+export default request;
 ```
 
 # 13、前端通过代理解决跨域问题
@@ -383,16 +543,14 @@ module.exports = {
 	//关闭eslint
 	lintOnSave: false,
 	devServer: {
-		// true 则热更新，false 则手动刷新，默认值为 true
-		inline: false,
-		// development server port 8000
-		port: 8001,
 		//代理服务器解决跨域
 		proxy: {
-			//会把请求路径中的/api换为后面的代理服务器
-			"/api": {
-				//提供数据的服务器地址
-				target: "http://39.98.123.211",
+			// 匹配所有以 '/api'开头的请求路径
+			'/api': {
+				// 代理目标的基础路径，会在/api前面加上target中的路径
+				target: 'http://39.98.123.211',
+				//如果匹配到/api后需要去掉或者替换'/api'路径，则需要配置pathRewrite
+				//pathRewriter:{"^/api":"要替换的路径"}, //这个项目都是/api的路径所以不需要替换
 			},
 		},
 	},
@@ -402,7 +560,7 @@ module.exports = {
 [webpack 官网相关知识解读](https://webpack.docschina.org/configuration/dev-server/#devserverproxy)
 网站中的 webpack.config.js 就是 vue.config.js 文件。
 
-# 14、请求接口统一封装
+# 14、请求接口统一封装，方便扩展接口
 
 在文件夹 api 中创建 index.js 文件，用于封装所有请求
 **将每个请求封装为一个函数，并暴露出去，组件只需要调用相应函数即可，这样当我们的接口比较多时，如果需要修改只需要修改该文件即可。**
@@ -411,13 +569,13 @@ module.exports = {
 
 ```js
 //当前模块，API进行统一管理，即对请求接口统一管理
-import requests from "@/api/request";
+import requests from '@/api/request';
 
 //首页三级分类接口
 export const reqCateGoryList = () => {
 	return requests({
-		url: "/product/getBaseCategoryList",
-		method: "GET",
+		url: '/product/getBaseCategoryList',
+		method: 'GET',
 	});
 };
 ```
@@ -425,7 +583,7 @@ export const reqCateGoryList = () => {
 当组件想要使用相关请求时，只需要导入相关函数即可，以上图的 reqCateGoryList 为例:
 
 ```js
-import { reqCateGoryList } from "./api";
+import { reqCateGoryList } from './api';
 //发起请求
 reqCateGoryList();
 ```
@@ -435,46 +593,60 @@ reqCateGoryList();
 打开一个页面时，往往会伴随一些请求，并且会在页面上方出现进度条。它的原理时，在我们发起请求的时候开启进度条，在请求成功后关闭进度条，所以只需要在 request.js 中进行配置。
 如下图所示，我们页面加载时发起了一个请求，此时页面上方出现蓝色进度条
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/f0df5bccfaee4274b45755b52bf40b60.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
+
+安装插件
+
+```shell
+cnpm i nprogres
+```
+
 对应的 request.js 设置
 
 ```js
-import axios from "axios";
+//封装axios
+import axios from 'axios';
 //引入进度条
-import nprogress from "nprogress";
+import nprogress from 'nprogress';
+//start()开启进度条  done()关闭进度条
 //引入进度条样式
-import "nprogress/nprogress.css";
-//1、对axios二次封装
-const requests = axios.create({
-	//基础路径，requests发出的请求在端口号后面会跟改baseURl
-	baseURL: "/api",
+import 'nprogress/nprogress.css';
+
+//创建一个新的axios，和原本的axios区别在于没有取消请求和批量发请求的方法, 其它所有语法都是一致的
+const request = axios.create({
+	//基础路径，会在requests发出的请求url地址前面加上baseURl
+	baseURL: '/api',
+	//设置超时时间5s
 	timeout: 5000,
 });
-//2、配置请求拦截器
-requests.interceptors.request.use(config => {
-	//config内主要是对请求头Header配置
-	//比如添加token
 
-	//开启进度条
+//设置请求拦截器
+request.interceptors.request.use(config => {
+	//对请求做一些特殊处理
+	//主要是对请求头Header配置比如添加token
+	console.log('开启请求拦截器');
+	//发出请求时开启进度条
 	nprogress.start();
-	return config;
+	return config; //必须返回请求，不然拦截了就发不出去了请求
 });
-//3、配置相应拦截器
-requests.interceptors.response.use(
-	res => {
-		//成功的回调函数
 
-		//响应成功，关闭进度条
+//设置响应拦截器
+request.interceptors.response.use(
+	response => {
+		//响应成功的回调函数
+		//对响应做一些处理
+		//响应成功后关闭进度条
 		nprogress.done();
-		return res.data;
+		return response.data.data; //返回服务器响应数据
 	},
 	error => {
-		//失败的回调函数
-		console.log("响应失败" + error);
-		return Promise.reject(new Error("fail"));
+		//响应失败的回调函数
+		console.log('请求失败了----', error);
+		return new Promise(() => {}); //中断Promise链，便于异步任务使用await关键字
 	}
 );
-//4、对外暴露
-export default requests;
+
+//暴露封装好的axios
+export default request;
 ```
 
 可以通过修改 nprogress.css 文件的 background 来修改进度条颜色。
@@ -485,8 +657,8 @@ export default requests;
 首先确保安装了 vuex,根目录创建 store 文件夹，文件夹下创建 index.js，内容如下：
 
 ```js
-import Vue from "vue";
-import Vuex from "vuex";
+import Vue from 'vue';
+import Vuex from 'vuex';
 
 Vue.use(Vuex);
 
@@ -505,14 +677,14 @@ main.js:
 **但凡是在 main.js 中的 Vue 实例中注册的实体，在所有的组件中都会有（this.$.实体名）属性**
 
 ```js
-import store from "./store";
+import store from './store';
 new Vue({
 	render: h => h(App),
 	//注册路由，此时组件中都会拥有$router $route属性
 	router,
 	//注册store,此时组件中都会拥有$store
 	store,
-}).$mount("#app");
+}).$mount('#app');
 ```
 
 # 17、async await 使用
@@ -521,7 +693,7 @@ new Vue({
 案例：我们将一个 axios 请求封装为了函数，我们在下面代码中调用了该函数：
 
 ```js
-import { reqCateGoryList } from "@/api";
+import { reqCateGoryList } from '@/api';
 export default {
 	actions: {
 		categoryList() {
@@ -587,7 +759,7 @@ async addOrUpdateShopCart({commit},{skuId,skuNum}){
 [辅助函数官网链接](https://vuex.vuejs.org/zh/guide/state.html#%E5%9C%A8-vue-%E7%BB%84%E4%BB%B6%E4%B8%AD%E8%8E%B7%E5%BE%97-vuex-%E7%8A%B6%E6%80%81)
 **注意**：**使用 action 时，函数的第一个参数，必须是{commit}**，即使不涉及到 mutations 操作，也必须加上该参数，否则会报错。
 
-# 19、loadsh 插件防抖和节流
+# 19、loadsh 插件防抖和节流（重点）
 
 在进行窗口的 resize、scroll，输入框内容校验等操作时，如果事件处理函数调用的频率无限制，会加重浏览器的负担，导致用户体验非常糟糕。此时我们可以采用 debounce（防抖）和 throttle（节流）的方式来减少调用频率，同时又不影响实际效果。
 安装 lodash 插件，该插件提供了防抖和节流的函数，我们可以引入 js 文件，直接调用。当然也可以自己写防抖和节流的函数
@@ -702,7 +874,52 @@ goSearch(event){
     },
 ```
 
-# 21、Vue 路由销毁问题
+# 21、商品三级分类的显示问题
+
+## 21.1、Search 组件中商品分类与过渡动画
+
+> 1.Search 组件中默认商品分类列表是隐藏的，通过 v-show 来实现
+>
+> Home 组件一直是显示状态所以需要判断路由，来决定商品分类的显示
+>
+> ```js
+> <div class="sort" v-show="isShow">
+>
+> //如果是Home组件，就显示TypeNav
+> if (this.$route.path === '/') this.isShow = true;
+> ```
+>
+> 2.绑定鼠标移入移出事件来控制商品分类显示
+>
+> ```js
+> <!-- 绑定鼠标移入移出事件来控制商品分类显示 -->
+> <div @mouseenter="showSort" @mouseleave="hideSort">
+>
+>   //鼠标移入，商品分类显示
+>   showSort() {
+>   this.isShow = true;
+> },
+>   //鼠标离开，商品分类隐藏，Home组件除外，因为它需要一直显示
+>   hideSort() {
+>     if (this.$route.path !== '/') this.isShow = false;
+>   },
+> ```
+>
+> 3.通过 transitios 添加动画
+>
+> ```html
+> <!-- 添加过渡动画 -->
+> <transition name="sort">
+> 	/* vue封装的动画默认样式名称开头是v，可以改名字
+> 	在transition标签加上name="xxx"，name开头就必须是xxx */
+> 	/*进入的起点,离开的终点 */ .sort-enter, .sort-leave-to { opacity: 0; }
+> 	/*进入过程中, 离开过程中 */ .sort-enter-active, .sort-leave-active {
+> 	transition: 0.5 linear; } /* 进入的终点，离开的起点 */ .sort-enter-to,
+> 	.sort-leave { opacity: 1; }</transition
+> >
+> ```
+
+## 21.2、Vue 路由销毁问题
 
 **Vue 在路由切换的时候会销毁旧路由**。
 我们在三级列表全局组件 TypeNav 中的 mounted 进行了请求一次商品分类列表数据。
@@ -710,7 +927,32 @@ goSearch(event){
 如下图所示：当我们在包含三级列表全局组件的不同组件之间进行切换时，都会进行一次信息请求。
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/ea8ece30280d452b920c25ecbf1ed211.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
 由于信息都是一样的，出于性能的考虑我们希望该数据只请求一次，所以我们把这次请求放在 App.vue 的 mounted 中。（根组件 App.vue 的 mounted 只会执行一次）
-**注意**：虽然 main.js 也是只执行一次，但是不可以放在 main.js 中。因为只有组件的身上才会有$store 属性。
+**注意**：虽然 main.js 也是只执行一次，但是不可以放在 main.js 中。所有的业务操作都应该放在组件中。
+
+## 21.3、整合路由参数
+
+> 点击商品分类链接跳转到 Search 模块只能传递 query 参数，点击搜索框只能传递 params 参数，需要整合在一起（实际工作中要统一，这里是为了演示整合参数）
+>
+> TypeNav 组件(商品分类路由跳转)中：
+>
+> ```js
+> //整合params参数，判断路由中如果有params参数，就需要在传递的时候带上
+> if (this.$route.params) location.params = this.$route.params;
+> ```
+>
+> Header 组件(搜索框路由跳转)中：
+>
+> ```js
+> //整合params参数，判断路由中如果有params参数，就需要在传递的时候带上
+> const location = {
+> 	name: 'search', //对象写法，则不能使用 path 配置项，必须使用 name 配置
+> 	params: { keyWords: this.keyWords || undefined }, //加入||undefined，当我们传递的参数为空串时地址栏url也可以保持正常
+> };
+> if (this.$route.query) location.query = this.$route.query;
+> this.$router.push(location);
+> ```
+
+1111111-0817
 
 # 22、mock 插件使用
 
@@ -721,14 +963,14 @@ banner、floor 分别为轮播图和页面底部的假数据。
 mockServer.js 文件
 
 ```js
-import Mock from "mockjs";
+import Mock from 'mockjs';
 //webpack默认对外暴露：json、图片
-import banner from "./banner.json";
-import floor from "./floor.json";
+import banner from './banner.json';
+import floor from './floor.json';
 
 //mock数据：第一个参数请求地址、第二个参：请求数据
-Mock.mock("/mock/banner", { code: 200, data: banner });
-Mock.mock("/mock/floor", { code: 200, data: floor });
+Mock.mock('/mock/banner', { code: 200, data: banner });
+Mock.mock('/mock/floor', { code: 200, data: floor });
 //记得要在main.js中引入一下
 //import ''@/mock/mockServer
 ```
@@ -793,7 +1035,7 @@ export default {
 
 **总结**：只要是公共数据都会放在 store 中，之后的实现步骤就是上面的固定步骤。
 
-# 24、swiper 插件实现轮播图
+# 24、swiper 插件实现轮播图（重点）
 
 [swiper 官网](https://www.swiper.com.cn/usage/index.html)
 官网中给出了代码实例：
@@ -803,6 +1045,13 @@ export default {
 > （2）在需要使用轮播图的组件内导入 swpier 和它的 css 样式
 > （3）在组件中创建 swiper 需要的 dom 标签（html 代码，参考官网代码）
 > （4）创建 swiper 实例
+>
+>  new Swiper(swiperContainer, parameters)
+>
+> | 参数名          | 类型                  | 是否必填 | 描述                                                     |
+> | --------------- | --------------------- | -------- | -------------------------------------------------------- |
+> | swiperContainer | HTMLElement or string | 必选     | Swiper 容器的 css 选择器，例如`".swiper"`；或者 dom 元素 |
+> | parameters      | object                | 可选     | Swiper 的个性化配置                                      |
 
 **注意**：在创建 swiper 对象时，我们会传递一个参数用于获取展示轮播图的 DOM 元素，官网直接通过 class（**而且这个 class 不能修改，是 swiper 的 css 文件自带的**）获取。但是这样有缺点：当页面中有多个轮播图时，因为它们使用了相同的 class 修饰的 DOM，就会出现所有的 swiper 使用同样的数据，这肯定不是我们希望看到的。
 解决方法：在轮播图最外层 DOM 中添加 ref 属性
@@ -846,7 +1095,7 @@ mounted() {
 	//请求数据
     this.$store.dispatch("getBannerList")
     //创建swiper实例
-    let mySwiper = new Swiper(document.getElementsByClassName("swiper-container"),{
+    let mySwiper = new Swiper(".swiper-container",{
         pagination:{
           el: '.swiper-pagination',
           clickable: true,
@@ -974,10 +1223,10 @@ export default {
     bannerList(newValue,oldValue){
         //this.$nextTick()使用
         this.$nextTick(()=>{
-          let mySwiper = new Swiper(document.getElementsByClassName("swiper-container"),{
+          let mySwiper = new Swiper('#mySwiper',{
             pagination:{
               el: '.swiper-pagination',
-              clickable: true,
+              clickable: true,		//分页器是否可点击切换
             },
             // 如果需要前进后退按钮
             navigation: {
@@ -1000,18 +1249,42 @@ export default {
 
 # 25、props 父子组件通信
 
-[prop 官方讲解](https://cn.vuejs.org/v2/guide/components-props.html)
-原理：父组件设置一个属性绑定要传递的数据
-子组件 props 接受该属性值
-本项目的
-父组件:home 文件下的 index.js
+> 适用场景：数据在父组件，需要在子组件中展示，由父组件决定子组件展示哪些信息
+>
+> 原理：父组件设置一个属性绑定要传递的数据，子组件 props 接受该属性值
+>
+> 1.  功能：让组件接收外部传过来的数据
+>
+> 2.  传递数据：`<Demo name="xxx"/>`
+>
+> 3.  接收数据：
+>
+> 4.  第一种方式（只接收）：`props:['name'] `
+>
+> 5.  第二种方式（限制类型）：`props:{name:String}`
+>
+> 6.  第三种方式（限制类型、限制必要性、指定默认值）：
+>
+>     ```js
+>     props:{
+>     	name:{
+>     	type:String, //类型
+>     	required:true, //必要性
+>     	default:'老王' //默认值
+>     	}
+>     }
+>     ```
+>
+> 备注：props 是只读的，Vue 底层会监测你对 props 的修改，如果进行了修改，就会发出警告，若业务需求确实需要修改，那么请复制 props 的内容到 data 中一份，然后去修改 data 中的数据。
+
+> 父组件:Home 组件
 
 ```js
 <template>
 <div>
 //...省略
 <!--  父组件通过自定义属性list给子组件传递数据-->
-  <Floor v-for="floor in floorList"  :key="floor.id" :list="floor"/>
+  <Floor v-for="floor in floorList"  :key="floor.id" :floor="floor"/>
 <!--  商标-->
 
 </div>
@@ -1019,7 +1292,7 @@ export default {
 
 ```
 
-子组件：Floor 下的 index.vue
+> 子组件：Floor 组件
 
 ```js
 <template>
@@ -1031,27 +1304,22 @@ export default {
 
 <script>
 export default {
-  name: "floor",
+  name: "Floor",
 //子组件通过props属性接受父组件传递的数据
-  props:['list']
+  props:['floor']
 }
 </script>
 ```
 
-上面两代码一看，发现父子组件竟然都是 Floor 组件，这使得我们对父子组件的概念难以理解。
-**个人理解 1**：
-我们 Floor 文件夹下的 index.vue 创建了 Floor 组件，我们把它认为子组件。
-我们在 home 文件夹下引用了该组件并使用了它，具体表现为`<Floor v-for="floor in floorList" :key="floor.id" :list="floor"/>`，此处使用的 Floor 标签，我们将其称为父组件。
-**个人理解 2**：
-Floor 是子组件，我们在 home 组件中调用了 Floor，我们把 home 组件认为父组件，我们在 home 组件中实现了由 home 组件向 Floor 组件传递信息的操作，即父组件向子组件传递信息。
+## $attrs
 
-如下图所示：
-第一张图是 home 组件的信息，我们的目的上将 floorList 中的数据分发给 Floor 组件。
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/5f43c0c951b446ef92de7c00e37b05ee.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
-通过前面描述的代码我们实现了父子通信，即将 floorList 分发给 Floor 组件。下图为 Floor 组件信息
-![在这里插入图片描述](https://img-blog.csdnimg.cn/d1609e96dd89467c805ddef0bedf171a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
-对于父子组件的理解，我更偏向于**个人理解二**，因为它可以通过上面图片得到很好的解释。但是**个人理解一**对于新手理解起来更容易。
+> 一个包含了组件所有透传 attributes 的对象。
+>
+> - **详细信息**
+>
+> [透传 Attributes](https://cn.vuejs.org/guide/components/attrs.html) 是指由父组件传入，且没有被子组件声明为 props 或是组件自定义事件的 attributes 和事件处理函数。
+>
+> 默认情况下，若是单一根节点组件，`$attrs` 中的所有属性都是直接自动继承自组件的根元素。而多根节点组件则不会如此，同时你也可以通过配置 [`inheritAttrs`](https://cn.vuejs.org/api/options-misc.html#inheritattrs) 选项来显式地关闭该行为。
 
 # 26、将轮播图模块提取为公共组件
 
@@ -1147,7 +1415,7 @@ Vuex 允许我们在 store 中定义“getter”（可以认为是 store 的计�
 store 中 search 模块代码
 
 ```js
-import { reqGetSearchInfo } from "@/api";
+import { reqGetSearchInfo } from '@/api';
 const state = {
 	searchList: {},
 };
@@ -1162,7 +1430,7 @@ const actions = {
 		let result = await reqGetSearchInfo(data);
 
 		if (result.code === 200) {
-			commit("SEARCHLIST", result.data);
+			commit('SEARCHLIST', result.data);
 		}
 	},
 };
@@ -1199,7 +1467,7 @@ export default {
 
 后续数据的动态渲染就和之前模块相同，没有什么难度。
 
-# 28、Object.asign 实现对象拷贝
+# 28、Object.asign 实现对象拷贝（浅拷贝）
 
 [参考链接](https://www.jianshu.com/p/f9ec860ecd81)
 
@@ -1323,7 +1591,7 @@ new Vue({
 	router,
 	//注册store,此时组件中都会拥有$store
 	store,
-}).$mount("#app");
+}).$mount('#app');
 ```
 
 （2）search 组件使用$bus 通信，第一个参数可以理解为为通信的暗号，还可以有第二个参数（用于传递数据），我们这里只是用于通知 header 组件进行相应操作，所以没有设置第二个参数。
@@ -1559,11 +1827,11 @@ computed:{
       }
 ```
 
-# 35、手写分页器
+# 35、手写分页器（重点）
 
 实际开发中是不会手写的，一般都会用一些开源库封装好的分页，比如 element ui。但是这个知识还是值得学习一下的。
 核心属性：
-pageNo（当前页码）、pageSize、total、continues（连续展示的页码）
+pageNo（当前页码）、pageSize(每页多少数据)、total(一共多少条数据)、continues（连续展示的页码个数，一般是奇数 5,因为奇数对称）
 核心逻辑是获取连续页码的起始页码和末尾页码，通过计算属性获得。（计算属性如果想返回多个数值，可以通过对象形式返回）
 
 ```js
@@ -1658,7 +1926,7 @@ html 代码
 如果返回值为对象加||{}，数组：||[ ]。
 此处 categoryView 为对象，所以将 getters 代码改为`return state.goodInfo.categoryView||{}`
 
-# 39、商品详情
+# 39、商品详情（重点）
 
 商品详情唯一难点就是点击轮播图图片时，改变放大镜组件展示的图片。
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/64917660fe194ea1ac2cca35a0b332e7.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_20,color_FFFFFF,t_70,g_se,x_16)
@@ -1782,8 +2050,8 @@ detail store 对应代码
 ```js
 export const reqGetCartList = () => {
 	return requests({
-		url: "/cart/cartList",
-		method: "GET",
+		url: '/cart/cartList',
+		method: 'GET',
 	});
 };
 ```
@@ -1794,17 +2062,17 @@ export const reqGetCartList = () => {
 **生成临时游客的 uuid（随机字符串）,每个用户的 uuid 不能发生变化，还要持久存储**
 
 ```js
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 //生成临时游客的uuid（随机字符串）,每个用户的uuid不能发生变化，还要持久存储
 export const getUUID = () => {
 	//1、判断本地存储是否由uuid
-	let uuid_token = localStorage.getItem("UUIDTOKEN");
+	let uuid_token = localStorage.getItem('UUIDTOKEN');
 	//2、本地存储没有uuid
 	if (!uuid_token) {
 		//2.1生成uuid
 		uuid_token = uuidv4();
 		//2.2存储本地
-		localStorage.setItem("UUIDTOKEN", uuid_token);
+		localStorage.setItem('UUIDTOKEN', uuid_token);
 	}
 	//当用户有uuid时就不会再生成
 	return uuid_token;
@@ -1824,14 +2092,14 @@ const state = {
 在 request.js 中设置请求头
 
 ```js
-import store from "@/store";
+import store from '@/store';
 requests.interceptors.request.use(config => {
 	//config内主要是对请求头Header配置
 
 	//1、先判断uuid_token是否为空
 	if (store.state.detail.uuid_token) {
 		//2、userTempId字段和后端统一
-		config.headers["userTempId"] = store.state.detail.uuid_token;
+		config.headers['userTempId'] = store.state.detail.uuid_token;
 	}
 	//比如添加token
 
@@ -1916,8 +2184,23 @@ mounted(){
     },
 ```
 
-但是这样做不会更新商品数据，个人猜测原因是：因为我要跳往的路由和当前路由相同，并且路由参数没有改变，所以他就不会跳转。或者是会跳转。但是，因为路由信息没有变化，所以不会执行 mounted 函数。
-**这里还是自己对路由和 mounted 内容不够了解，有了解的小伙伴可以帮我解答一下疑问吗？欢迎评论区解答。**
+但是这样做不会更新商品数据，原因是：因为我要跳往的路由和当前路由相同，并且路由参数没有改变，所以他就不会跳转。
+
+vue-router 判断路由相同时会如下报错，但是项目刚开始时候重写过路由的 push 方法，将错误掩盖了
+
+<strong style="color:red">NavigationDuplicated: Avoided redundant navigation to current location</strong>
+
+## a 标签阻止点击事件
+
+> ```css
+> .click-disabled {
+>
+> ​       // 给a标签添加css属性，禁止点击a标签
+>
+> ​       pointer-events: none; //阻止所有点击事件
+>
+> ​      }
+> ```
 
 # 44、购物车状态修改和商品删除
 
@@ -2055,7 +2338,7 @@ computed 中的 cartInfoList 没有写[ ]返回值。当后台返回的购物车
       },
 ```
 
-# 46、注册登录业务(ES6 const 新用法)
+# 46、注册登录业务(重点)
 
 **1、ES6 const 新用法**
 
@@ -2166,7 +2449,7 @@ mutations 设置用户 token
           const {phone,password} = this
           phone && password && await this.$store.dispatch('userLogin',{phone,password})
           //路由跳转到home首页
-          this.$router.push('/home')
+          this.$router.push('/')
         }catch (error){
           alert(error)
         }
@@ -2219,8 +2502,8 @@ router.beforeEach(async (to, from, next) => {
 	//1、有token代表登录，全部页面放行
 	if (token) {
 		//1.1登陆了，不允许前往登录页
-		if (to.path === "/login") {
-			next("/home");
+		if (to.path === '/login') {
+			next('/');
 		} else {
 			//1.2、因为store中的token是通过localStorage获取的，token有存放在本地
 			// 当页面刷新时，token不会消失，但是store中的其他数据会清空，
@@ -2231,29 +2514,29 @@ router.beforeEach(async (to, from, next) => {
 			else {
 				//1.2.2、如果没有用户信息，则派发actions获取用户信息
 				try {
-					await store.dispatch("getUserInfo");
+					await store.dispatch('getUserInfo');
 					next();
 				} catch (error) {
 					//1.2.3、获取用户信息失败，原因：token过期
 					//清除前后端token，跳转到登陆页面
-					await store.dispatch("logout");
-					next("/login");
+					await store.dispatch('logout');
+					next('/login');
 				}
 			}
 		}
 	} else {
 		//2、未登录，首页或者登录页可以正常访问
-		if (to.path === "/login" || to.path === "/home" || to.path === "/register")
+		if (to.path === '/login' || to.path === '/' || to.path === '/register')
 			next();
 		else {
-			alert("请先登录");
-			next("/login");
+			alert('请先登录');
+			next('/login');
 		}
 	}
 });
 ```
 
-# 48、交易模块
+# 48、交易模块（重点）
 
 如果前面的知识你都理解了，后面的模块开发都会比较简单。无非就是老师讲到的开发四步骤
 （1）封装 API
@@ -2262,6 +2545,8 @@ router.beforeEach(async (to, from, next) => {
 （4）数据渲染
 **注意：**（3）中，如果在发请求之后还有一些对返回数据的操作，应考虑到是否需要 async await。
 **至此，个人认为本项目中的 vue 前端知识点应该就这些了，后面的相关组件开发，用到的知识在前面都有使用。如果有新知识，会继续更新。**
+
+登录账号：13700000000/111111
 
 -------------------------------------------------分割线--------------------------------------------
 
@@ -2326,14 +2611,18 @@ router.beforeEach(async (to, from, next) => {
 
 **非 js 内引入图片（html）**：一般都是通过路径引入，例如：`<img src="../assets/pay.jpg">`。
 
+### _js 中引入图片为什么需要 require 或者 import?_
+
+> 原因：webpack 会将 js 中引入的东西都当做模块，模块只能通过 require(CommonJS 语法)或 import(ES6 语法)
+
 **js 内引入图片**: 可分为通过路径引入和不通过路径引入。
 1、如果想要通过**路径方式**在 vue 中的 js 引入图片，**必须 require 引入**。
 例如：js 中引入个人支付二维码可以通过下面方式实现
 
 ```js
 this.$alert(
-	`<img height="200px" width="200px" src="${require("@/assets/pay.jpg")}"  / >`,
-	"请使用微信扫码",
+	`<img height="200px" width="200px" src="${require('@/assets/pay.jpg')}"  / >`,
+	'请使用微信扫码',
 	{
 		dangerouslyUseHTMLString: true,
 		showCancelButton: true,
@@ -2369,7 +2658,8 @@ methods:{
 
 终于用到了二级路由，虽然二级路由在后台管理系统常用，但是我们的个人中心也可以用到二级路由。
 routers.js
-**注意：** 二级路由要么不写/，要么写全：'/center/myorder'。
+
+> **注意：** 二级路由要么不写/，要么写全：'/center/myorder'。_VueRouter 已经自动加上了/_
 
 ```js
 //个人中心
@@ -2396,7 +2686,16 @@ routers.js
     }
 ```
 
+## 关于 router-view
+
+> <router-view>是一个路由展示占位符，能且只能展示当前组件下的下一级路由组件。如果是展示下下级路由，则需要在下级路由中使用<router-view>
+
+## 默认路由重定向
+
+个人中心会显示子路由中其中一个页面作为默认页面，这里我们把 MyOrder 组件作为默认页面。
+
 ` { path: '', redirect: 'myorder' }`表示当我们访问 center 路由时，center 中的 router-view 部分默认显示 myorder 二级路由内容。
+
 我们的子路由最好放在父路由文件夹下，如下所示。
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/cc1f89458d094fdfa8852b930295b13c.png)
 **警告**
@@ -2404,6 +2703,8 @@ routers.js
 图中内容如下：
 
 > Named Route 'Center' has a default child route. When navigating to this named route (:to="{name: 'Center'"), the default child route will not be rendered. Remove the name from this route and use the name of the default child route for named links instead.
+>
+> **警告缘由**：Center 路由有默认子路由，如果路由跳转使用命名路由，则无法渲染默认的子路由。解决办法是去掉 name:'Center'就好了。
 
 对应的代码
 
@@ -2432,11 +2733,6 @@ routers.js
     }
 ```
 
-**总结警告缘由**：当某个路由有子级路由时，父级路由须要一个默认的路由，因此父级路由不能定义 name 属性，解决办法是去掉 name:'Center'就好了。
-
-我的订单部分使用到了之前写的分页器组件，当我再次使用时，我发现我已经快忘记这个分页器怎么写的了。个人觉得需要勤复习之前的知识点。
-**老师这个手写的分页器很 nice，涉及到一些分页逻辑还有父子双向通信**
-
 # 50、路由独享的守卫(**\***)
 
 全局导航守卫已经帮助我们限制未登录的用户不可以访问相关页面。但是还会有一个问题。
@@ -2461,6 +2757,7 @@ routers.js
             if(from.path ===  '/shopcart' ){
                 next()
             }else{
+              //next(false): 中断当前的导航。如果浏览器的 URL 改变了 (可能是用户手动或者浏览器后退按钮)，那么 URL 地址会重置到 from 路由对应的地址。
                 next(false)
             }
         }
@@ -2515,10 +2812,24 @@ trade 路由信息
 
 **注意，判断通过后，在跳转之前一定要将 flag 置为 false。**
 
+## 关于在 trade 和 pay 页刷新回到 home 问题
+
+> 原因：刷新相当于由'/'跳转到'/trade'或者'/pay'，因为加了判断，所以会停留在路由为'/'的页面。然后因为我们重定向了路由，如果路由为'/'则跳转到'/'。（此处 vue-DevTools 显示的路由 from 是有问题的）
+>
+> 解决办法：不能用路由的 path 来判断，最好使用 meta 里面添加标识，来标记路由是从目标路由跳转过来的
+
 # 51、图片懒加载
 
 [懒加载 vue-lazyload 插件官网](https://www.npmjs.com/package/vue-lazyload)
 插件的使用直接参考官方教程，很简单。
+
+
+
+## 挖个坑，自己封装图片懒加载插件
+
+
+
+
 
 ## vue 使用插件的原理
 
@@ -2530,8 +2841,23 @@ vue 使用插件的步骤
 
 # 52、表单验证
 
-表单验证个人推荐使用 element ui 的 from 表单验证，看一下官网的示例就会用。
+## vee-validate表单验证（不推荐，太难用了）
+
+> Vue3用npm i vee-validate@4
+>
+> Vue2用npm i vee-validate@2或者3版本 推荐用2版本，3版本看不懂
+
+##  element ui 的 from 表单验证（推荐）
+
 [element ui from 表单验证链接](https://element.eleme.cn/#/zh-CN/component/form)
+
+
+
+## 自己封装表单验证插件（用js实现，了解验证过程）
+
+
+
+
 
 # 53、路由懒加载
 
@@ -2574,6 +2900,16 @@ dist 文件下的 js 文件存放我们所有的 js 文件，并且经过了加�
 在 vue.config.js 配置`productionSourceMap: false`即可。
 注意：vue.config.js 配置改变，需要重启项目
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/88b191bbbb12475cb56b0adf63737848.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5q-b5q-b6Jmr5ZGc5ZGc,size_17,color_FFFFFF,t_70,g_se,x_16)
+
+
+
+# nginx反向代理
+
+
+
+
+
+
 
 # 55、Vue 新知识点（只针对个人）
 
@@ -2678,3 +3014,9 @@ dist 文件下的 js 文件存放我们所有的 js 文件，并且经过了加�
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/c22b1de529b74548873f10399807d86c.png)
 
 [插槽官方链接](https://cn.vuejs.org/v2/guide/components-slots.html#%E6%8F%92%E6%A7%BD%E5%86%85%E5%AE%B9)
+
+# 56、项目亮点
+
+## 1.自己封装组件--分页器、封装防抖/节流函数
+
+## 2.使用图片懒加载、路由懒加载优化首屏显示

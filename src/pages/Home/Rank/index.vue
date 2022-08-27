@@ -97,125 +97,125 @@
 </template>
 
 <script>
-export default {
-	name: "Rank",
-};
+	export default {
+		name: 'Rank',
+	};
 </script>
 
 <style scoped lang="less">
-.rank {
-	width: 1200px;
-	margin: 0 auto;
-
-	.tab {
+	.rank {
+		width: 1200px;
 		margin: 0 auto;
-		overflow: hidden;
-		width: 312px;
 
-		.tab-tit {
-			text-align: center;
+		.tab {
+			margin: 0 auto;
+			overflow: hidden;
+			width: 312px;
 
-			a {
-				display: block;
-				padding: 0 18px;
-				float: left;
-				text-decoration: none;
-				font-size: 16px;
-				color: #999;
+			.tab-tit {
+				text-align: center;
 
-				p {
-					margin: 5px 0;
-				}
+				a {
+					display: block;
+					padding: 0 18px;
+					float: left;
+					text-decoration: none;
+					font-size: 16px;
+					color: #999;
 
-				.img {
-					i {
-						width: 35px;
-						height: 35px;
-						display: block;
-						background: url(./images/bg0.png);
-						margin-left: 10px;
+					p {
+						margin: 5px 0;
+					}
+
+					.img {
+						i {
+							width: 35px;
+							height: 35px;
+							display: block;
+							background: url(./images/bg0.png);
+							margin-left: 10px;
+						}
+					}
+
+					.text {
+						line-height: 28px;
 					}
 				}
 
-				.text {
-					line-height: 28px;
-				}
-			}
+				.on {
+					color: #e60012;
 
-			.on {
-				color: #e60012;
-
-				.img {
-					i {
-						background-position: -35px 0;
+					.img {
+						i {
+							background-position: -35px 0;
+						}
 					}
 				}
 			}
 		}
-	}
 
-	.content {
-		overflow: hidden;
-		padding: 10px;
+		.content {
+			overflow: hidden;
+			padding: 10px;
 
-		ul {
-			li {
-				overflow: hidden;
-				list-style: none;
-				line-height: 18px;
-
-				.img-item {
-					border: 1px solid #e1251b;
-					width: 269px;
-					float: left;
+			ul {
+				li {
 					overflow: hidden;
-					margin: 0 12px 10px;
-					background: #fff;
+					list-style: none;
+					line-height: 18px;
 
-					.tab-pic {
-						width: 230px;
-						height: 210px;
+					.img-item {
+						border: 1px solid #e1251b;
+						width: 269px;
+						float: left;
 						overflow: hidden;
-						text-align: center;
-						margin: 5px auto 18px;
+						margin: 0 12px 10px;
+						background: #fff;
 
-						a {
-							img {
-								width: 200px;
-								height: 200px;
-							}
-						}
-					}
-
-					.tab-info {
-						background: #fafafa;
-
-						.info-title {
-							height: 50px;
-							line-height: 28px;
+						.tab-pic {
+							width: 230px;
+							height: 210px;
 							overflow: hidden;
-							margin: 0 auto;
-							padding-left: 10px;
+							text-align: center;
+							margin: 5px auto 18px;
 
 							a {
-								color: #333;
-								text-decoration: none;
+								img {
+									width: 200px;
+									height: 200px;
+								}
 							}
 						}
 
-						.info-price {
-							font-size: 20px;
-							color: #e1251b;
-							height: 35px;
-							padding-left: 10px;
-							display: block;
-							line-height: 24px;
-							margin: 10px auto 0;
+						.tab-info {
+							background: #fafafa;
+
+							.info-title {
+								height: 50px;
+								line-height: 28px;
+								overflow: hidden;
+								margin: 0 auto;
+								padding-left: 10px;
+
+								a {
+									color: #333;
+									text-decoration: none;
+								}
+							}
+
+							.info-price {
+								font-size: 20px;
+								color: #e1251b;
+								height: 35px;
+								padding-left: 10px;
+								display: block;
+								line-height: 24px;
+								margin: 10px auto 0;
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-}
 </style>

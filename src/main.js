@@ -16,11 +16,21 @@ import Pagination from '@/components/Pagination';
 import store from './store';
 // 引入mock模拟数据，需要在程序启动时执行一次
 import '@/mock/mockServer.js';
+// 统一引入api管理对象，将其注册到vue的原型对象上
+import * as API from '@/api';
+// 按需引入element-ui
+import { Button, MessageBox } from 'element-ui';
+// 引入懒加载图片插件
+import VueLazyload from 'vue-lazyload';
+// 引入表单验证模块
+import '@/plugins/validate';
 
 //关闭生产提示
 Vue.config.productionTip = false;
 //使用vue-router插件
 Vue.use(VueRouter);
+// 使用懒加载插件，可以在需要懒加载的图片的src换成自定义指令v-lazy
+Vue.use(VueLazyload);
 
 //第一个参数：全局组件名字，第二个参数：全局组件
 //将商品三级分类导航菜单注册为全局组件
@@ -29,6 +39,9 @@ Vue.component(TypeNav.name, TypeNav);
 Vue.component('Carousel', Carousel);
 //将分页器注册为全局组件
 Vue.component('Pagination', Pagination);
+// 将element-ui的Button组件注册为全局组件
+Vue.component(Button.name, Button);
+Vue.prototype.$alert = MessageBox.alert;
 
 new Vue({
 	// 注册App组件
@@ -40,5 +53,6 @@ new Vue({
 
 	beforeCreate() {
 		Vue.prototype.$bus = this; //安装全局事件总线，$bus就是当前应用的vm
+		Vue.prototype.$API = API; //安装全局api，这样可以在this.$API上直接调用请求接口
 	},
 }).$mount('#app'); //指定根容器
