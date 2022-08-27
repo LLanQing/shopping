@@ -45,7 +45,7 @@ VueRouter.prototype.replace = function (location, resolve, reject) {
 // 创建路由实例
 const router = new VueRouter({
 	//mode配置路由工作模式，其值有两个：'hash'、'history'，默认是hash模式
-	mode: 'history',
+	mode: 'hash',
 	//路由配置
 	routes,
 	//滚动行为
