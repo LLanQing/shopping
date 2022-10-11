@@ -419,7 +419,7 @@ Vue.component(TypeNav.name, TypeNav);
 
 
 
-# 10、代码改变时实现页面自动刷新（新版本已经是自动刷新）
+# 10、启动项目自动打开浏览器
 
 根目录下 vue.config.js 文件设置
 
@@ -427,12 +427,10 @@ Vue.component(TypeNav.name, TypeNav);
 module.exports = {
 	//关闭eslint
 	lintOnSave: false,
-	devServer: {
-		// true 则热更新，false 则手动刷新，默认值为 true
-		inline: true,
-		// development server port 8000
-		port: 8001,
-	},
+	//项目启动自动在指定的ip:port打开浏览器
+  host: 'localhost',
+  port: 8080,
+  open: true,
 };
 ```
 
@@ -2959,9 +2957,25 @@ app.listen(5001, error => {
 
 # 56、组件间通信方式
 
+常用的有6种，还有一些不常用的了解就行
+
 ## 1、props 
 
-自定义组件。比如我们之前自定义的分页器组件例如：
+### 1.1使用子组件使用props接受
+
+>使用场景:[父子通信]
+>
+>传递数据类型：
+>1:可能是函数  -----------实质子组件想给父亲传递数据
+>2:可能不是函数-----------实质就是父亲给子组件传递数据
+><TodoList :todos="123"  updateChecked="hander">
+>
+>特殊情况：路由传递props
+>1:布尔值类型，把路由中params参数映射为组件props数据
+>2:对象，静态数据，很少用
+>3:函数，可以把路由中params|query参数映射为组件props数据
+
+自定义组件使用props传递数据。比如我们之前自定义的分页器组件例如：
 
 ```js
 <PageNation @click="getPageNo"
@@ -2982,33 +2996,383 @@ app.listen(5001, error => {
 
 [props 官方文档](https://cn.vuejs.org/v2/guide/components-props.html)
 
-## 2、ref 使用
+### 1.2[非 Prop 的 Attribute](https://v2.cn.vuejs.org/v2/guide/components-props.html#非-Prop-的-Attribute)
 
-我们可以通过 ref 获取组件的信息，并且可以写该组件的信息：
-例如：**父组件想要获取子组件的信息或者修改子组件的数据**，就可以通过 ref 获取。
+`$attrs`：组件实例的属性，可以获取到父亲传递的props数据（前提子组件没有通过props接受）
 
-**使用步骤**：
 
-> （1）在被操作的标签定义 ref="name"
-> （2）在父组件可以通过 this.$refs.name 获取标签的全部信息，也可以进行数据的修改。
 
-[ref 使用参考链接](https://www.cnblogs.com/xumqfaith/p/7743387.html)
+## 2、组件的自定义事件
 
-## 3、$ children $parent 使用
+### 2.1、常规：绑定自定义事件
 
-> 在 56 小节中讲到，如果我们父组件想要获取修改子组件信息，可以通过 ref 实现。但是，当子组件较多时，就会出现多次的$refs 操作，会十分的麻烦。所以，引入了 children 属性。
+1. 一种组件间通信的方式，适用于：<strong style="color:red">子组件 ===> 父组件</strong>
 
-**children 属性**
-每个组件都有 children 属性，可以通过 this.$ children 操作，该属性会返回当前组件的所有子组件信息，接下来就可以实现子组件信息的获取和修改。
-**parent 属性**
-了解了 children 属性，那么 parent 也比较好理解。子组件可以通过 parent 属性获取父组件的全部信息，同样也可以修改父组件的信息。
+2. 使用场景：A 是父组件，B 是子组件，B 想给 A 传数据，那么就要在 A 中给 B 绑定自定义事件（<span style="color:red">事件的回调在 A 中</span>）。
 
-**例题**：想要通过点击子组件，使得父组件的 money 变量减 100。
+3. 绑定自定义事件：
 
-> 不使用 parents：子组件通过之前常用的自定事件来通知父组件修改 money，然后父组件 money 执行减操作。
-> 使用 parents：子组件直接通过 this.$parent 属性获取父组件，然后在子组件内部对 money 执行减操作。
+   1. 第一种方式，在父组件中通过@绑定：`<Demo @atguigu="test"/>` 或 `<Demo v-on:atguigu="test"/>`
 
-## 4、插槽使用
+   2. 第二种方式，在父组件中：
+
+      通过$on绑定。
+
+      ```js
+      <Demo ref="demo"/>
+      ......
+      mounted(){
+         this.$refs.xxx.$on('atguigu',this.test)
+      }
+      ```
+
+   3. 若想让自定义事件只能触发一次，可以使用`once`修饰符，或`$once`方法。
+
+4. 触发自定义事件：`this.$emit('atguigu',数据)`
+
+5. 解绑自定义事件`this.$off('atguigu')`
+
+6. 组件上也可以绑定原生 DOM 事件，需要使用`native`修饰符。
+
+7. 注意：通过`this.$refs.xxx.$on('atguigu',回调)`绑定自定义事件时，回调<span style="color:red">要么配置在 methods 中</span>，<span style="color:red">要么用箭头函数</span>，否则 this 指向会出问题！
+
+8. <strong style="color:red">$listeners：组件实例的属性，可以获取到父亲传递自定义事件（对象形式呈现）</strong>
+
+9. ### [使用事件抛出一个值](https://v2.cn.vuejs.org/v2/guide/components.html#使用事件抛出一个值)
+
+`有的时候用一个事件来抛出一个特定的值是非常有用的。例如我们可能想让 `<blog-post>` 组件决定它的文本要放大多少。这时可以使用 `$emit` 的第二个参数来提供这个值：
+
+```html
+<button v-on:click="$emit('enlarge-text', 0.1)">
+  Enlarge text
+</button>
+```
+
+9.1然后当在父级组件监听这个事件的时候，我们可以通过 `$event` 访问到被抛出的这个值：
+
+```html
+<blog-post
+  ...
+  v-on:enlarge-text="postFontSize += $event"
+></blog-post>
+```
+
+9.2或者，如果这个事件处理函数是一个方法：
+
+```html
+<blog-post
+  ...
+  v-on:enlarge-text="onEnlargeText"
+></blog-post>
+```
+
+那么这个值将会作为第一个参数传入这个方法：
+
+```js
+methods: {
+  onEnlargeText: function (enlargeAmount) {
+    this.postFontSize += enlargeAmount
+  }
+}
+```
+
+### 2.2、v-model实现组件通信？
+
+#### 2.2.1、v-model实现双向数据绑定
+
+`v-model` 指令在表单 `<input>`、`<textarea>` 及 `<select>` 元素上创建双向数据绑定。它会根据控件类型自动选取正确的方法来更新元素。尽管有些神奇，但 `v-model` 本质上不过是语法糖。它负责``监听用户的输入事件以更新数据``，并对一些极端场景进行一些特殊处理。
+
+> *对于非组件标签，v-model只能应用在表单类元素（输入类元素）上*
+>
+> ```html
+> <h2 v-model:x="value">错误写法</h2>
+> <!-- 错误写法,报错：Error compiling template:
+> <h2 v-model="value">: v-model is not supported on this element type. 
+>  -->
+> ```
+>
+> 
+
+> `v-model` 会忽略所有表单元素的 `value`、`checked`、`selected` attribute 的初始值而总是将 Vue 实例的数据作为数据来源。你应该通过 JavaScript 在组件的 `data` 选项中声明初始值。
+>
+> *收集表单数据：*
+>
+> ​    *若：<input type="text"/>，则v-model收集的是value值，用户输入的就是value值。*
+>
+> ​    *若：<input type="radio"/>，则v-model收集的是value值，且要给标签配置value值。*
+>
+> ​    *若：<input type="checkbox"/>*
+>
+> ​     *1.没有配置input的value属性，那么收集的就是checked（勾选 or 未勾选，是布尔值）*
+>
+> ​     *2.配置input的value属性:*
+>
+> ​       *(1)v-model的初始值是非数组，那么收集的就是checked（勾选 or 未勾选，是布尔值）*
+>
+> ​       *(2)v-model的初始值是数组，那么收集的的就是value组成的数组*
+>
+> ​    *备注：v-model的三个修饰符：*
+>
+> ​      *lazy：失去焦点再收集数据*
+>
+> ​      *number：输入字符串转为有效的数字*
+>
+> ​      *trim：输入首尾空格过滤*
+
+
+
+> v-model实现原理：  
+>
+> `v-model` 在内部为不同的输入元素使用不同的 property 并抛出不同的事件：
+>
+> - text 和 textarea 元素使用 `value` property 和 `input` 事件；
+> - checkbox 和 radio 使用 `checked` property 和 `change` 事件；
+> - select 字段将 `value` 作为 prop 并将 `change` 作为事件。
+
+#### 2.2.2、v-model实现父子通信且数据同步
+
+[自定义组件的 `v-model`官网描述]((https://v2.cn.vuejs.org/v2/guide/components-custom-events.html#自定义组件的-v-model))
+
+> <strong style="color:red">一个组件上的 v-model 默认会利用名为 value 的 prop 和名为 input 的事件</strong>
+
+```html
+<CustomInput v-model="msg"></CustomInput>
+<!-- 这行代码相当于(v-model是语法糖)
+<CustomInput :value='msg' @input='msg = $event'></CustomInput>
+-->
+```
+
+> 上面一行代码：v-model绑定的"msg"通过props以value这个属性传给CustomInput这个子组件，即在CustomInput组件中可以使用 `props:['value']` 接收到 ``"msg"``。并且给CustomInput组件绑定了名为 ``'input'``的自定义事件，即`@input`
+>
+> 当CustomInput组件触发一个 `input` 事件并附带一个新的值的时候,即 `$emit('input',newValue)`这个 `msg` 的 property 将会被更新
+>
+> ```vue
+> <template>
+>   <div style="background: #ccc; height: 50px;">
+>     <h2>input包装组件----{{value}}</h2>
+>     <input :value="value"  @input="$emit('input',$event.target.value)"/>
+>   </div>
+> </template>
+> 
+> <script type="text/ecmascript-6">
+>   export default {
+>     name: 'CustomInput',
+>     props:['value']
+>   }
+> </script>
+> 
+> ```
+>
+> `msg`的数据在父子组件里面是同步的，父组件传递给子组件，子组件触发自定义事件又修改了msg的值，父子组件`msg`双向绑定。
+
+
+
+> 但是像单选框、复选框等类型的输入控件可能会将 value attribute 用于不同的目的。model 选项可以用来避免这样的冲突：
+>
+> ```js
+> Vue.component('base-checkbox', {
+>   model: {
+>     prop: 'checked',
+>     event: 'change'
+>   },
+>   props: {
+>     checked: Boolean
+>   },
+>   template: `
+>     <input
+>       type="checkbox"
+>       v-bind:checked="checked"
+>       v-on:change="$emit('change', $event.target.checked)"
+>     >
+>   `
+> })
+> ```
+>
+> 
+
+
+
+### 2.3、属性修饰符.sync，可以实现父子数据同步。
+
+以后在elementUI组件中出现，实现父子数据同步。
+
+[.sycn修饰符官网解释](https://v2.cn.vuejs.org/v2/guide/components-custom-events.html)
+
+> 父组件:
+>
+> ```html
+> <!-- props传递money，绑定自定义事件'update:money' -->	
+> <Child :money="money" @update:money="money = $event"></Child>
+> <h2>使用sync修改符等价于上面的代码，其实就是语法糖</h2>
+> <Child2 :money.sync="money"></Child2>
+> ```
+>
+> 子组件：
+>
+> ```html
+> <button @click="$emit('update:money', money - 100)">花钱</button>
+> ```
+>
+> 注意带有 `.sync` 修饰符的 `v-bind` **不能**和表达式一起使用 (例如 `v-bind:title.sync=”doc.title + ‘!’”` 是无效的)。取而代之的是，你只能提供你想要绑定的 property 名，类似 `v-model`。
+
+
+
+>当我们用一个对象同时设置多个 prop 的时候，也可以将这个 `.sync` 修饰符和 `v-bind` 配合使用：
+>
+>```html
+><text-document v-bind.sync="doc"></text-document>
+>
+><script type="text/ecmascript-6">
+>	import text-document from './text-document.vue'
+>	export default {
+>	  name: 'SyncTest',
+>	  data() {
+>	    return {
+>	      doc:{
+>	      	title:'.sync修饰符',
+>	      	content:'自定义事件'
+>	      }
+>	    }
+>	  },
+>	  components: {
+>	    text-document
+>	  }
+>	}
+></script>
+>```
+>
+>
+>
+>这样会把 `doc` 对象中的每一个 property (如 `title`、`content`) 都作为一个独立的 prop 传进去，然后各自添加用于更新的 `v-on` 监听器。
+>
+>注意：将 `v-bind.sync` 用在一个字面量的对象上，例如 `v-bind.sync=”{ title: doc.title }”`，是无法正常工作的，因为在解析一个像这样的复杂表达式的时候，有很多边缘情况需要考虑。
+
+### 2.4、$listeners(用的不多了解就行)
+
+> Vue 提供了一个 `$listeners` property，它是一个对象，里面包含了父组件绑定到子组件上的所有监听器
+>
+> 父组件：
+>
+> ```html
+> <HintButton
+> 			type="success"
+> 			icon="el-icon-plus"
+> 			title="封装el-button"
+> 			@click="handler"
+> 			@dblclick="1"
+> 			@el-button="2"
+> 		/>
+> ```
+>
+> 子组件：
+>
+> ```html
+> <el-button v-bind="$attrs" v-on="$listeners">添加</el-button>
+> <!-- v-on="$listeners":
+>           相当于 @click="$emit('click')"  @dblclick="$emit('dblclick')" @el-button="$emit('el-button')"-->
+> <script>
+> 	export default {
+> 		name: '',
+> 		props: ['title'],
+> 		mounted() {
+> 			//this.$attrs:可以获取到父亲传递的数据【props】
+> 			//this.$attrs是可以获取父亲传递的props数据，如果子组件通过
+> 			//props:[],接受，this.$attrs属性是获取不到的
+> 			console.log(this.$attrs);
+> 			console.log(this.$listeners); //{click: ƒ, dblclick: ƒ, el-button: ƒ}
+> 		},
+> 	};
+> </script>
+> 
+> ```
+>
+> 可以通过 `v-on="$listeners"` 传入子组件——在创建更高层次的组件时非常有用
+
+
+
+## 3、全局事件总线$bus（GlobalEventBus）
+
+1. 一种组件间通信的方式，适用于<span style="color:red">任意组件间通信</span>。
+
+2. 安装全局事件总线：
+
+   ```js
+   new Vue({
+   	......
+   	beforeCreate() {
+   		Vue.prototype.$bus = this //安装全局事件总线，$bus就是当前应用的vm
+   	},
+       ......
+   })
+   ```
+
+3. 使用事件总线：
+
+   1. 接收数据：A 组件想接收数据，则在 A 组件中给$bus 绑定自定义事件，事件的<span style="color:red">回调留在 A 组件自身。</span>
+
+      ```js
+      methods(){
+        demo(data){......}
+      }
+      ......
+      mounted() {
+        this.$bus.$on('xxxx',this.demo)
+      }
+      ```
+
+   2. 提供数据：`this.$bus.$emit('xxxx',数据)`
+
+4. 最好在 beforeDestroy 钩子中，用$off 去解绑<span style="color:red">当前组件所用到的</span>事件。
+
+
+
+## 4、消息订阅与发布（pubsub）
+
+`在Vue框架里面用得少，因为完全可以用事件总线代替还不用考虑this指向问题`
+
+1. 一种组件间通信的方式，适用于<span style="color:red">任意组件间通信</span>。
+
+2. 使用步骤：
+
+   1. 安装 pubsub：`npm i pubsub-js`
+
+   2. 引入: `import pubsub from 'pubsub-js'`
+
+   3. 接收数据：A 组件想接收数据，则在 A 组件中订阅消息，订阅的<span style="color:red">回调留在 A 组件自身。</span>
+
+      ```js
+      methods(){
+        demo(data){......}
+      }
+      ......
+      mounted() {
+        this.pid = pubsub.subscribe('xxx',this.demo) //订阅消息
+      }
+      ```
+
+   4. 提供数据：`pubsub.publish('xxx',数据)`
+
+   5. 最好在 beforeDestroy 钩子中，用`PubSub.unsubscribe(pid)`去<span style="color:red">取消订阅。</span>
+
+
+
+## 5、Vuex
+
+### 1.概念
+
+ 在 Vue 中实现集中式状态（数据）管理的一个 Vue 插件，对 vue 应用中多个组件的共享状态进行集中式的管理（读/写），也是一种组件间通信的方式，且适用于任意组件间通信。
+
+### 2.何时使用？
+
+ 多个组件需要共享数据时
+
+
+
+
+
+
+
+## 6、插槽slot--父子通信【结构】
 
 插槽也是可以用来传数据的
 子组件 HintButton
@@ -3041,16 +3405,50 @@ app.listen(5001, error => {
 父组件向子组件传递信息还是通过 props 传递，这里就不多做赘述。
 子组件想父组件传递信息时可以通过插槽传递。
 
-> （1）在子组件 HintButton 的 slot 内绑定要传递的数据。
+
+
+> （1）在子组件 HintButton 的 slot 内绑定要传递的数据。绑定在 `<slot>` 元素上的 attribute 被称为**插槽 prop**
+>
 > （2） 父组件通过 v-slot:default="slotProps"可以接收到全部的信息。
 
 箭头所指内容就是子组件通过插槽传递给父组件的信息。接受的数据是键值对的形式。
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/c22b1de529b74548873f10399807d86c.png)
 
-[插槽官方链接](https://cn.vuejs.org/v2/guide/components-slots.html#%E6%8F%92%E6%A7%BD%E5%86%85%E5%AE%B9)
+[插槽官方链接](https://v2.cn.vuejs.org/v2/guide/components-slots.html#%E4%BD%9C%E7%94%A8%E5%9F%9F%E6%8F%92%E6%A7%BD)
 
-# 57、项目亮点
 
-## 1.自己封装组件--分页器、封装防抖/节流函数
 
-## 2.使用图片懒加载、路由懒加载优化首屏显示
+## 9、ref 使用
+
+我们可以通过 ref 获取组件的信息，并且可以写该组件的信息：
+例如：**父组件想要获取子组件的信息或者修改子组件的数据**，就可以通过 ref 获取。
+
+**使用步骤**：
+
+> （1）在被操作的标签定义 ref="name"
+> （2）在父组件可以通过 this.$refs.name 获取标签的全部信息，也可以进行数据的修改。
+
+[ref 使用参考链接](https://www.cnblogs.com/xumqfaith/p/7743387.html)
+
+## 10、\$ children ​\$parent 使用(尽量不要使用，了解就行)
+
+> 在 56 小节中讲到，如果我们父组件想要获取修改子组件信息，可以通过 ref 实现。但是，当子组件较多时，就会出现多次的$refs 操作，会十分的麻烦。所以，引入了 children 属性。
+
+**\$children 属性**
+每个组件都有 \$children 属性，可以通过 this.$ children 操作，该属性会返回当前组件的所有子组件信息，接下来就可以实现子组件信息的获取和修改。
+
+> 当前实例的直接子组件。**需要注意 `$children` 并不保证顺序，也不是响应式的。**如果你发现自己正在尝试使用 `$children` 来进行数据绑定，考虑使用一个数组配合 `v-for` 来生成子组件，并且使用 Array 作为真正的来源。
+
+**\$parent 属性**
+了解了 \$children 属性，那么 \$parent 也比较好理解。子组件可以通过 \$parent 属性获取父组件的全部信息，同样也可以修改父组件的信息。
+
+**例题**：想要通过点击子组件，使得父组件的 money 变量减 100。
+
+> 不使用 parents：子组件通过之前常用的自定事件来通知父组件修改 money，然后父组件 money 执行减操作。
+> 使用 parents：子组件直接通过 this.$parent 属性获取父组件，然后在子组件内部对 money 执行减操作。
+
+
+
+
+
+## 

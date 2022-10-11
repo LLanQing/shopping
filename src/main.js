@@ -18,7 +18,7 @@ import store from './store';
 import '@/mock/mockServer.js';
 // 统一引入api管理对象，将其注册到vue的原型对象上
 import * as API from '@/api';
-// 按需引入element-ui
+// 按需引入element-ui，样式会根据引入的组件自动引入
 import { Button, MessageBox } from 'element-ui';
 // 引入懒加载图片插件
 import VueLazyload from 'vue-lazyload';

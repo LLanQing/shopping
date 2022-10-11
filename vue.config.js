@@ -6,6 +6,10 @@ module.exports = defineConfig({
 	lintOnSave: false,
 	//开启代理服务器解决跨域问题
 	devServer: {
+		//项目启动自动在指定的ip:port打开浏览器
+		// host: 'localhost',
+		// port: 8080,
+		// open: true,
 		proxy: {
 			// 当请求的前缀是/api，直接转发请求到服务器http://gmall-h5-api.atguigu.cn
 			'/api': {
